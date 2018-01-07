@@ -114,9 +114,6 @@
 \renewcommand\maketitle{\begin{titlepage}%
   \checkifdefined{@department}%
     {Tituliniame puslapyje nenurodyta katedra (komanda \protect\department)}
-  \checkifdefined{@supervisor}%
-    {Tituliniame puslapyje nenurodytas darbo vadovas (komanda \protect\supervisor)}
-   ~
   \begin{center}
       {\setstretch{1.3}\large \MakeUppercase{\@university} \\
           \MakeUppercase{\@faculty} \\
@@ -141,7 +138,9 @@
                   {\begin{tabular}[t]{l l}%
                   \medskip Atliko: &\; \@status \\
                   \medskip\bigskip   &\; \@author \hfill \@signatureplace \\
-                  \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+                  \ifdefined\@supervisor 
+                    \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+                  \fi
                   % Recenzentas: &\; \@reviewer \hfill \@signatureplace
                   \end{tabular} \par}%
               \end{flushright}
@@ -155,8 +154,10 @@
                   \medskip Atliko: &\; \@status \\
                   \bigskip   &\; \@author \hfill \@signatureplace \\
                   \medskip\bigskip &\; \@secondauthor \hfill \@signatureplace \\
-                  \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+                  \ifdefined\@supervisor 
+                    \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
                   % Recenzentas: &\; \@reviewer \hfill \@signatureplace
+                  \fi
                   \end{tabular} \par}%
               \end{flushright}
               \vskip 3.8cm
@@ -171,7 +172,9 @@
               \bigskip   &\; \@author \hfill \@signatureplace \\
               \bigskip &\; \@secondauthor \hfill \@signatureplace \\
               \medskip\bigskip &\; \@thirdauthor \hfill \@signatureplace \\
-              \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+              \ifdefined\@supervisor 
+                \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+              \fi
               % Recenzentas: &\; \@reviewer \hfill \@signatureplace
               \end{tabular} \par}%
           \end{flushright}
@@ -188,11 +191,13 @@
           \bigskip &\; \@secondauthor \hfill \@signatureplace \\
           \bigskip &\; \@thirdauthor \hfill \@signatureplace \\
           \medskip\bigskip &\; \@fourthauthor \hfill \@signatureplace \\
-          \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+          \ifdefined\@supervisor 
+            \bigskip Darbo vadovas: &\; \@supervisor \hfill  \@signatureplace \\
+          \fi
           % Recenzentas: &\; \@reviewer \hfill \@signatureplace
           \end{tabular} \par}%
       \end{flushright}
-      \vskip 3.4cm
+      \vskip 3.8cm
     }
   }{
     \vskip 2.2cm
@@ -206,7 +211,9 @@
         \medskip &\; \@thirdauthor & \@signatureplace \\
         \medskip &\; \@fourthauthor & \@signatureplace \\
         \medskip\bigskip &\; \@fifthauthor & \@signatureplace \\
-        \bigskip Darbo vadovas: & \@supervisor & \@signatureplace \\
+        \ifdefined\@supervisor 
+          \bigskip Darbo vadovas: & \@supervisor & \@signatureplace \\
+        \fi
         % Recenzentas: &\; \@reviewer \hfill \@signatureplace
         \end{tabular} \par}%
     \end{flushright}
