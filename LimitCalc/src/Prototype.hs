@@ -130,22 +130,37 @@ div2 x y = Series {sNeg = [], sPos = div1 x y}
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
-fsin :: Floating a => Series a -> Series a
-fsin s
-    | (not . null) (sNeg s) = error "bad fsin arg"
+makeFunction :: Floating a => (Integer -> a -> a) -> Series a -> Series a
+makeFunction deriv s 
+    | (not . null) (sNeg s) = error "bad function arg"
     | otherwise = Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = (foldl1 (crazyZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
-
             a = safeHead (sPos s)
             coefs = 0 : safeTail (sPos s)
             powers = iterate (mul_ coefs) [1]
-            coef n = deriv n / fromIntegral (fac n)
-            deriv n
-                | n `mod` 4 == 0 = sin a
-                | n `mod` 4 == 1 = cos a
-                | n `mod` 4 == 2 = -(sin a)
-                | otherwise = -(cos a)
+            coef n = deriv n a
+
+fsin :: Floating a => Series a -> Series a
+fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
+    where
+        deriv n a
+            | n `mod` 4 == 0 = sin a
+            | n `mod` 4 == 1 = cos a
+            | n `mod` 4 == 2 = -(sin a)
+            | otherwise = -(cos a)
+            
+fcos :: Floating a => Series a -> Series a
+fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
+    where
+        deriv n a
+            | n `mod` 4 == 0 = cos a
+            | n `mod` 4 == 1 = - (sin a)
+            | n `mod` 4 == 2 = -(cos a)
+            | otherwise = sin a
+
+fe :: Floating a => Series a -> Series a
+fe = makeFunction (\_ a -> exp a / fromIntegral (fac n))
 
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
