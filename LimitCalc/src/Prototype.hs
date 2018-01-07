@@ -160,7 +160,10 @@ fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
             | otherwise = sin a
 
 fe :: Floating a => Series a -> Series a
-fe = makeFunction (\_ a -> exp a / fromIntegral (fac n))
+fe = makeFunction (\n a -> exp a / fromIntegral (fac n))
+
+flog :: Floating a => Series a -> Series a
+flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n))
 
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
