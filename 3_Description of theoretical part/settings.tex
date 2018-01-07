@@ -1,0 +1,7 @@
+\newenvironment{innerParagraph}[1][0.5cm]{\begin{adjustwidth}{#1}{}}{\end{adjustwidth}}
+
+\newlist{userTypes}{itemize*}{1}
+\setlist[userTypes]{itemjoin=\newline, label=\textbullet}
+
+\newlist{activities}{enumerate}{1}
+\setlist[activities]{label=\textbf{PV\arabic*.}}
