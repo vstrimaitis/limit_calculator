@@ -1,32 +1,24 @@
 module Prototype where
 
-data Series = Series {
-    sNeg :: [Double],
-    sPos :: [Double]
+data Series a = Series {
+    sNeg :: [a],
+    sPos :: [a]
 }
 
-fromDouble :: Double -> Series
-fromDouble d = Series {sNeg = [], sPos = [d]}
+fromNum :: (Num a) => a -> Series a
+fromNum d = Series {sNeg = [], sPos = [d]}
 
-x :: Series
+x :: Num a => Series a
 x = Series {sNeg = [], sPos = [0, 1]}
 
-one :: Series
-one = fromDouble 1
-
-sinx :: Series
-sinx = Series {sNeg = [], sPos = map f [0..]}
-    where 
-        f n
-            | n `mod` 2 == 0 = 0
-            | n `mod` 4 == 1 = 1.0 / fromIntegral (fac n)
-            | otherwise = - 1.0 / fromIntegral (fac n)
+one :: Num a => Series a
+one = fromNum 1
 
 fac :: Integer -> Integer
 fac 0 = 1
 fac n = n * fac (n-1)
 
-instance Show Series where
+instance (Show a, Eq a, Num a) => Show (Series a) where
     show s = combine (showNeg (sNeg s)) (showPos (sPos s))
         where
             maxPosTerms = 20
@@ -37,17 +29,17 @@ instance Show Series where
             combine s "" = s
             combine s t = s ++ " + " ++ t
 
-            showNeg :: [Double] -> String
+            showNeg :: (Show a, Eq a, Num a) => [a] -> String
             showNeg l = joinTerms (showNeg' (-1) l []) " + "
 
-            showPos :: [Double] -> String
+            showPos :: (Show a, Eq a, Num a) => [a] -> String
             showPos l = joinTerms (reverse (showPos' 0 l [])) " + "
             
-            showNeg' :: Int -> [Double] -> [String] -> [String]
+            showNeg' :: (Show a, Eq a, Num a) => Int -> [a] -> [String] -> [String]
             showNeg' _ [] acc = filter (not . null) acc
             showNeg' n (x:xs) acc = showNeg' (n-1) xs (showTerm x n:acc)
 
-            showPos' :: Int -> [Double] -> [String] -> [String]
+            showPos' :: (Show a, Eq a, Num a) => Int -> [a] -> [String] -> [String]
             showPos' _ [] acc = filter (not . null) acc
             showPos' n (x:xs) acc
                 | n >= maxPosTerms = filter (not . null) $ "..." : acc
@@ -59,11 +51,9 @@ instance Show Series where
                 | otherwise = cc ++ "x" ++ e
                     where
                         cc
-                            | c < 0 = "(" ++ show c ++ ")*"
                             | c == 1 = ""
                             | otherwise = show c ++ "*"
                         e
-                            | n < 0 = "^(" ++ show n ++ ")"
                             | n == 1 = ""
                             | otherwise = "^" ++ show n
 
@@ -72,33 +62,33 @@ instance Show Series where
             joinTerms [x] _ = x
             joinTerms (x:xs) sep = x ++ sep ++ joinTerms xs sep
 
-crazyZip :: (Double -> Double -> Double) -> [Double] -> [Double] -> [Double]
+crazyZip :: Num a => (a -> a -> a) -> [a] -> [a] -> [a]
 crazyZip _ [] [] = []
 crazyZip f [] (y:ys) = crazyZip f [0] (y:ys)
 crazyZip f (x:xs) [] = crazyZip f (x:xs) [0]
 crazyZip f (x:xs) (y:ys) = f x y : crazyZip f xs ys
 
-(+:) :: Series -> Series -> Series
+(+:) :: Num a => Series a -> Series a -> Series a
 (+:) s1 s2 = Series { sNeg = crazyZip (+) (sNeg s1) (sNeg s2), sPos = crazyZip (+) (sPos s1) (sPos s2) }
 
-(-:) :: Series -> Series -> Series
+(-:) :: Num a => Series a -> Series a -> Series a
 (-:) s1 s2 = Series { sNeg = crazyZip (-) (sNeg s1) (sNeg s2), sPos = crazyZip (-) (sPos s1) (sPos s2) }
 
-safeHead :: [Double] -> Double
+safeHead :: Num a => [a] -> a
 safeHead [] = 0
 safeHead (x:xs) = x
 
-safeTail :: [Double] -> [Double]
+safeTail :: [a] -> [a]
 safeTail [] = []
 safeTail (x:xs) = xs
 
-mulBy :: Series -> Int -> Series
+mulBy :: Num a => Series a -> Int -> Series a
 mulBy s 0 = s
 mulBy s n
     | n < 0     = mulBy (Series {sNeg = safeHead (sPos s) : sNeg s, sPos = safeTail (sPos s)}) (n+1)
     | otherwise = mulBy (Series {sNeg = safeTail (sNeg s), sPos = safeHead (sNeg s) : sPos s}) (n-1) 
 
-mul_ :: [Double] -> [Double] -> [Double]
+mul_ :: Num a => [a] -> [a] -> [a]
 mul_ [] _ = []
 mul_ _ [] = []
 mul_ (x:xs) (y:ys) = (x*y) : crazyZip (+) d (0:c)
@@ -108,7 +98,7 @@ mul_ (x:xs) (y:ys) = (x*y) : crazyZip (+) d (0:c)
         c = mul_ xs ys
         d = crazyZip (+) a b
 
-(*:) :: Series -> Series -> Series
+(*:) :: Num a => Series a -> Series a -> Series a
 (*:) s1 s2 = mulBy Series {sNeg = [], sPos = a} (-c1-c2)
     where
         a = mul_ b1 b2
@@ -119,18 +109,17 @@ mul_ (x:xs) (y:ys) = (x*y) : crazyZip (+) d (0:c)
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
-div1 :: [Double] -> [Double] -> [Double]
+div1 :: Fractional a => [a] -> [a] -> [a]
 div1 _ [] = error "div by zero"
-div1 [] (0:ys) = error "im broken"
 div1 [] (_:ys) = []
 div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (crazyZip (-) xs (map (*(x/y)) ys ))) ys
 
-div2 :: [Double] -> [Double] -> Series
+div2 :: (Eq a, Fractional a) => [a] -> [a] -> Series a
 div2 _ [] = error "im broken too"
 div2 x (0:ys) = mulBy (div2 x ys) (-1)
 div2 x y = Series {sNeg = [], sPos = div1 x y}
 
-(/:) :: Series -> Series -> Series
+(/:) :: (Eq a, Fractional a) => Series a -> Series a -> Series a
 (/:) s1 s2 = mulBy a (c2-c1)
     where
         a = div2 b1 b2
@@ -141,9 +130,9 @@ div2 x y = Series {sNeg = [], sPos = div1 x y}
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
-fsin :: Series -> Series
+fsin :: Floating a => Series a -> Series a
 fsin s
-    | sNeg s /= [] = error "bad fsin arg"
+    | (not . null) (sNeg s) = error "bad fsin arg"
     | otherwise = Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = (foldl1 (crazyZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
@@ -158,7 +147,7 @@ fsin s
                 | n `mod` 4 == 2 = -(sin a)
                 | otherwise = -(cos a)
 
-(!!!) :: [Double] -> Integer -> Double
+(!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
 (x:_) !!! 0 = x
 (_:xs) !!! n = xs !!! (n - 1)
