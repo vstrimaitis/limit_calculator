@@ -21,14 +21,15 @@ sinx = Series {sNeg = [], sPos = map f [0..]}
             | n `mod` 2 == 0 = 0
             | n `mod` 4 == 1 = 1.0 / fromIntegral (fac n)
             | otherwise = - 1.0 / fromIntegral (fac n)
-        
-        fac 0 = 1
-        fac n = n * fac (n-1)
+
+fac :: Integer -> Integer
+fac 0 = 1
+fac n = n * fac (n-1)
 
 instance Show Series where
     show s = combine (showNeg (sNeg s)) (showPos (sPos s))
         where
-            maxPosTerms = 10
+            maxPosTerms = 20
 
             combine :: String -> String -> String
             combine "" "" = "0"
@@ -140,4 +141,24 @@ div2 x y = Series {sNeg = [], sPos = div1 x y}
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
+fsin :: Series -> Series
+fsin s
+    | sNeg s /= [] = error "bad fsin arg"
+    | otherwise = Series { sNeg = [], sPos = map getCoef [0..] }
+        where
+            getCoef n = (foldl1 (crazyZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
 
+            a = safeHead (sPos s)
+            coefs = 0 : safeTail (sPos s)
+            powers = iterate (mul_ coefs) [1]
+            coef n = deriv n / fromIntegral (fac n)
+            deriv n
+                | n `mod` 4 == 0 = sin a
+                | n `mod` 4 == 1 = cos a
+                | n `mod` 4 == 2 = -(sin a)
+                | otherwise = -(cos a)
+
+(!!!) :: [Double] -> Integer -> Double
+[] !!! _ = 0
+(x:_) !!! 0 = x
+(_:xs) !!! n = xs !!! (n - 1)
