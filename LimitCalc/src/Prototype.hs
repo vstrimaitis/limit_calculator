@@ -1,5 +1,7 @@
 module Prototype where
 
+import Derivative
+
 data Series a = Series {
     sNeg :: [a],
     sPos :: [a]
@@ -21,7 +23,7 @@ fac n = n * fac (n-1)
 instance (Show a, Eq a, Num a) => Show (Series a) where
     show s = combine (showNeg (sNeg s)) (showPos (sPos s))
         where
-            maxPosTerms = 20
+            maxPosTerms = 10
 
             combine :: String -> String -> String
             combine "" "" = "0"
@@ -164,6 +166,14 @@ fe = makeFunction (\n a -> exp a / fromIntegral (fac n))
 
 flog :: Floating a => Series a -> Series a
 flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n))
+
+fatan :: (Eq a, Floating a) => Series a -> Series a
+fatan = makeFunction (\n a -> coefs a !!! n)
+    where
+        coefs a = atan a : [f a x | x <- [0..]]
+        base = Const 1 :/: (X :^: Const 2 :+: Const 1)
+        f a n = eval (dn (fromInteger n) base) a / fromIntegral (fac (n + 1))
+        --             ^ This is terribly slow for some reason, too tired to look into it atm
 
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
