@@ -1,77 +1,136 @@
 module Derivative where
 
-infixl 4 :+:, :-:
-infixl 5 :*:, :/:
-infixl 6 :^:
+data Term a = Term {
+    tCoef :: a,
+    tExp  :: a
+} deriving (Eq)
 
-data Expr a
-    = X
-    | Const a
-    | (Expr a) :+: (Expr a)
-    | (Expr a) :-: (Expr a)
-    | (Expr a) :*: (Expr a)
-    | (Expr a) :/: (Expr a)
-    | (Expr a) :^: (Expr a)
-    deriving (Eq, Show)
+instance (Eq a, Num a, Show a) => Show (Term a) where
+    show t
+        | tCoef t == 0 = "0"
+        | tExp t == 0 = show (tCoef t)
+        | otherwise = show (tCoef t) ++ "*x^" ++ show (tExp t)
 
-simp :: (Floating a, Eq a) => Expr a -> Expr a
-simp (Const x :+: Const y) = Const (x + y)
-simp (x :+: Const 0) = simp x
-simp (Const 0 :+: x) = simp x
+tMul :: (Num a, Eq a) => Term a -> Term a -> Term a
+tMul a b = Term {tCoef = tCoef a * tCoef b, tExp = tExp a + tExp b}
 
-simp (Const x :-: Const y) = Const (x - y)
-simp (x :-: Const 0) = simp x
-simp (Const 0 :-: x) = Const (-1) :*: simp x
+tSame :: (Num a, Eq a) => Term a -> [Term a] -> [Term a]
+tSame term = filter (\t -> tExp t == tExp term)
 
-simp (Const x :*: Const y) = Const (x*y)
-simp (x :*: Const 1) = simp x
-simp (Const 1 :*: x) = simp x
-simp (x :*: Const 0) = Const 0
-simp (Const 0 :*: x) = Const 0
+tDiff :: (Num a, Eq a) => Term a -> [Term a] -> [Term a]
+tDiff term = filter (\t -> tExp t /= tExp term)
 
-simp (Const x :^: Const y) = Const (x**y)
-simp (x :^: Const 1) = simp x
-simp (x :^: Const 0) = Const 1
+tEval :: (Floating a, Eq a) => Term a -> a -> a
+tEval t a = c * a ** e
+    where
+        c = tCoef t
+        e = tExp t
 
-simp ((z :^: Const x) :^: Const y) = z :^: Const (x * y)
-
-simp (Const x :*: (Const y :*: z)) = Const (x*y) :*: simp z
-simp (Const x :*: z :*: Const y) = Const (x*y) :*: simp z
-simp (z :*: Const x :*: Const y) = Const (x*y) :*: simp z
-
-simp (x :+: y) = simp x :+: simp y
-simp (x :-: y) = simp x :-: simp y
-simp (x :*: y) = simp x :*: simp y
-simp (x :/: y) = simp x :/: simp y
-simp (x :^: y) = simp x :^: simp y
-simp x = x
-
-simplify expr = simplify' expr (Const 0)
-    where simplify' expr last
-            | expr == last = expr
-            | otherwise = simplify' (simp expr) expr
+dTerm :: (Num a, Eq a) => Term a -> Term a
+dTerm t = Term {tCoef = c, tExp = e}
+    where
+        cc = tCoef t
+        ee = tExp t
+        c = cc * ee
+        e = ee - 1
 
 
-d :: (Floating a, Eq a) => Expr a -> Expr a
-d (Const _) = Const 0
-d X = Const 1
-d (x :+: y) = simplify $ d x :+: d y
-d (x :-: y) = simplify $ d x :-: d y
-d (x :*: y) = simplify $ x :*: d y :+: y :*: d x
-d (x :/: y) = simplify $ (y :*: d x :-: x :*: d y) :/: (y:^:Const 2)
-d (x :^: Const n) = Const n :*: x :^: Const (n-1) :*: d x
-d (x :^: _) = error "Cannot take derivative of non constant power"
-
-dn :: (Floating a, Eq a) => Int -> Expr a -> Expr a
-dn 0 = id
-dn n = foldr1 (.) (replicate n d)
 
 
-eval :: (Floating a) => Expr a -> a -> a
-eval (Const x) _ = x
-eval X a = a
-eval (x :+: y) a = eval x a + eval y a
-eval (x :-: y) a = eval x a - eval y a
-eval (x :*: y) a = eval x a * eval y a
-eval (x :/: y) a = eval x a / eval y a
-eval (x :^: y) a = eval x a ** eval y a
+newtype Polynomial a = Poly [Term a]
+
+instance (Eq a, Num a,Show a) => Show (Polynomial a) where
+    show (Poly l) = join (map show l) " + "
+        where
+            join :: [String] -> String -> String
+            join [] _ = ""
+            join [x] _ = x
+            join (x:xs) sep = x ++ sep ++ join xs sep
+
+pCompress :: (Num a, Eq a) => Polynomial a -> Polynomial a
+pCompress (Poly p) = pCompress' p []
+    where
+        pCompress' :: (Num a, Eq a) => [Term a] -> [Term a] -> Polynomial a
+        pCompress' [] acc = Poly (filter (\t -> tCoef t /= 0) acc)
+        pCompress' terms@(x:xs) acc = pCompress' (tDiff x terms) (combine (tSame x terms) : acc) 
+
+        combine :: (Num a, Eq a) => [Term a] -> Term a
+        combine [] = Term {tCoef = 0, tExp = 0}
+        combine terms = Term {tCoef = combo, tExp = tExp (head terms)}
+            where
+                combo = foldl (\acc x -> acc + tCoef x) 0 terms
+
+pAdd :: (Num a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+pAdd (Poly p1) (Poly p2) = pCompress (Poly (p1++p2))
+
+pSub :: (Num a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+pSub (Poly p1) (Poly p2) = pCompress (Poly (p1 ++ map (\t -> t {tCoef = -tCoef t}) p2))
+
+pMul :: (Num a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
+pMul (Poly p1) (Poly p2) = pCompress (Poly [tMul x y | x <- p1, y <- p2])
+
+pEval :: (Floating a, Eq a) => Polynomial a -> a -> a
+pEval (Poly p) a = foldl (\acc t -> acc + tEval t a) 0 p
+
+dPoly :: (Num a, Eq a) => Polynomial a -> Polynomial a
+dPoly (Poly p) = pCompress $ Poly (map dTerm p)
+
+
+
+
+
+data FracOpt a = FracOpt {
+    fTop :: Polynomial a,
+    fBottom :: Polynomial a,
+    fBottomExp :: a
+}
+
+instance (Eq a, Num a, Show a) => Show (FracOpt a) where
+    show f = "(" ++ show (fTop f) ++ ") / (" ++ show (fBottom f) ++ ") ^ " ++ show (fBottomExp f)
+
+dFrac :: (Num a, Eq a) => FracOpt a -> FracOpt a
+dFrac frac = FracOpt {fTop = t, fBottom = v, fBottomExp = n + 1}
+    where
+        u = fTop frac
+        v = fBottom frac
+        n = fBottomExp frac
+        u' = dPoly u
+        v' = dPoly v
+        t = pSub (pMul u' v) (pMul (pMul (Poly [Term n 0]) u) v')
+
+
+d :: (Num a, Eq a) => Int -> FracOpt a -> FracOpt a
+d 0 = id
+d n = foldr1 (.) (replicate n dFrac)
+
+fEval :: (Floating a, Eq a) => FracOpt a -> a -> a
+fEval f a = pEval (fTop f) a / pEval (fBottom f) a ** fBottomExp f
+
+-- data Frac a = Frac {
+--     fTop :: Polynomial a,
+--     fBottom :: Polynomial a
+-- }
+
+-- instance (Eq a, Num a, Show a) => Show (Frac a) where
+--     show f = "(" ++ show (fTop f) ++ ") / (" ++ show (fBottom f) ++ ")" 
+
+-- dFrac :: (Num a, Eq a) => Frac a -> Frac a
+-- dFrac frac = Frac {fTop = t, fBottom = b}
+--     where
+--         u = fTop frac
+--         v = fBottom frac
+--         u' = dPoly u
+--         v' = dPoly v
+--         t = pSub (pMul u' v) (pMul u v')
+--         b = pMul v v
+
+
+-- d :: (Num a, Eq a) => Int -> Frac a -> Frac a
+-- d 0 = id
+-- d n = foldr1 (.) (replicate n dFrac)
+
+-- fEval :: (Floating a, Eq a) => Frac a -> a -> a
+-- fEval f a = pEval (fTop f) a / pEval (fBottom f) a
+
+-- atanFrac :: Frac Double
+-- atanFrac = Frac (Poly [Term 1 0]) (Poly [Term 1 2, Term 1 0])

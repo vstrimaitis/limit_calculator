@@ -171,9 +171,8 @@ fatan :: (Eq a, Floating a) => Series a -> Series a
 fatan = makeFunction (\n a -> coefs a !!! n)
     where
         coefs a = atan a : [f a x | x <- [0..]]
-        base = Const 1 :/: (X :^: Const 2 :+: Const 1)
-        f a n = eval (dn (fromInteger n) base) a / fromIntegral (fac (n + 1))
-        --             ^ This is terribly slow for some reason, too tired to look into it atm
+        base = FracOpt (Poly [Term 1 0]) (Poly [Term 1 2, Term 1 0]) 1
+        f a n = fEval (d (fromInteger n) base) a / fromIntegral (fac (n + 1))
 
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
