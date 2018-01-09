@@ -73,3 +73,85 @@ $S - a_0 = P \times x$
 \[f(a) + \frac{f'(a)}{1!}(Px)+\frac{f''(a)}{2!}(Px)^2 + +\frac{f'''(a)}{3!}(Px)^3 + ...\]
 
 \[ g(a,n) = \frac{f^{(n)}(a)}{n!}\]
+
+
+
+
+
+
+
+
+
+
+
+Programos kūrimo metodika pasirinkta laipsnių eilutės. 
+Tai yra Teiloro eilučių praplėtimas, kuriame leidžiame turėti baigtiniį kiekį neigiamų laipsnių. 
+Jeigu skleidžiant įvestį gaunamas begalinis kiekis neigiamų laipsnių, ši metodika nebėra tinkama taikyti norint rasti išraiškos ribą.
+Tokiu atveju, naudojame eurisitinę analizę. 
+
+\subsection{Teiloro eilutės}
+	
+	%TEXT + formules esancios virsuje
+	
+\subsection{Laipsnių eilutės}
+	
+	Laipsnių eilutės užrašome taip:
+	
+	\[\sum_{n=0}^{\infty} a_nx^n + \sum_{m=-1}^{-k} a_mx^m = \sum_{i=-k}^{\infty} a_ix^i  = a_{-k} x^{-k} + ... + a_{-1} x^{-1} + a_0 + a_1 x + ... \]
+	
+	Tokiame užraše matome, jog teigiamų laipsnių galime turėti be galo daug, o neigiamų laipsnių kiekis būtinai turi būti baigtinis.
+	
+	Šioms eilutėms galima taikyti aritmetines operacijas:
+	
+	\begin{itemize}
+		\item Sudėties operacija atliekame sudėdami atitinkamus eilučių koeficientus ir gauname tokios pačios formos eilutę.
+		\item Atimties operacija veikia atitinkamai sudėčiai, tai yra, koeficientai atimami.
+		\item Daugybos opercija atliekama taip - kiekvieną pirmos eilutės narį dauginame su antros eilutės nariu.
+			  Gautą išraišką sutraukiame ir kiekvienam konkrečiam $n$ yra baigtinis skaičius narių turinčių $x^n$.
+			  Taip yra, nes $x^n$ išraišką gauname sudauginę $x^i$ ir $x^j$, kur $i <= \frac{n}{2}$ ir $j >= \frac{n}{2}$ ir atvirkščiai.
+			  Kiekvieną koeficientas yra konkretus skaičius, nes yra sutrauktas iš baigtinio kiekio narių.
+		\item Dalybos operacija atliekama pasiremiant polinomų dalybos stulpeliu algoritmą. 
+			  Šis algoritmas veikia taip pat kai turime ir baigtinius, ir begalinius dalinio ir daliklio argumentus.
+	\end{itemize}
+	
+	Turint aukščiau įvardintas operacijas galima bet kokią iš jų sudarytą išraišką pasiversti laipsnių eilute.
+	Dabar galima apibrėžti elgseną su funkcijomis.
+	
+	Sakykime turime išraišką $f(S)$ kur S yra laipsnių eilutė. 
+	Imame šios funkcijos Teiloro skleidinį kažkokiame taške $a$: 
+	
+	\[f(x) = f(a) + \frac{f'(a)}{1!}(x)+\frac{f''(a)}{2!}(x)^2 + +\frac{f'''(a)}{3!}(x)^3 + ...\]
+	
+	Jeigu $S$ turi bent vieną neigiamą $x$ laipsnį, tai keldami S visais natūraliaisiais laipsniais, galutinėje išraiškoje gausime begalo daug skirtingų neigiamų x laipsnių.
+	Tokia išraiška negali būti aprašyta mūsų apibrėžtomis laipsnių eilutėmis, nes neigiamų laipsnių privalo būti baigtinis kiekis. 
+	Todėl šioms situacijoms spręsti mes pasitelksime euristika.
+	Jeigu $S$ neturi nė vieno neigiamo $x$ laipsnio, galime imti $a = a_0$ ($S$ koeficientas prie $x^0$) .
+	Pasižymime:
+	
+	$P = \frac{S - a_0}{x}$
+	
+	Tada turime: 
+	
+	$S - a_0 = P \times x$
+	
+	Perrašome skleidinį:
+	
+	\[f(a) + \frac{f'(a)}{1!}(Px)+\frac{f''(a)}{2!}(Px)^2 + +\frac{f'''(a)}{3!}(Px)^3 + ...\]
+	
+	Gaulutinei laipsnių eilutei, į kurią susiprastina šis reiškinys, norime surasti koeficientą prie $x^n$. 
+	Šiame reiškinyje matome, kad šis koeficientas priklauso tik nuo pirmųjų $n+1$ sumos narių. 
+	Todėl norėdami rasti šį koeficientą, mes paimame tuos $n+1$ narių, juos suprastiname (naudodamiesi aukščiau parodytomis aritmetinėmis operacijomis) 
+	ir iš gautos eilutės paimame koeficientą prie $x^n$. 
+	Iš to seka, jog šis reiškinys susiprastina į laipsnių eilutę - galime rasti bet kurį tos eilutės koeficientą.
+	
+	Savo programoje galime pridėti naujų funkcijų, tereikia pateikti, kaip skaičiuojami tų funkcijų Teiloro skleidinio koeficientai. 
+	Tai yra, turime pateikti funkciją: 
+	
+	\[ g(a,n) = \frac{f^{(n)}(a)}{n!}\]
+	
+	
+\subsection{Euristikos}
+	
+	%Toliau euristikos bus
+	
+	
