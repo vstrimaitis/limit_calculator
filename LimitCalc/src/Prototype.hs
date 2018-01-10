@@ -1,6 +1,7 @@
 module Prototype where
 
 import Derivative
+import Expr
 
 data Series a = Series {
     sNeg :: [a],
@@ -178,3 +179,18 @@ fatan = makeFunction (\n a -> coefs a !!! n)
 [] !!! _ = 0
 (x:_) !!! 0 = x
 (_:xs) !!! n = xs !!! (n - 1)
+
+
+foldExpr :: (Eq a, Floating a) => Expr a -> Series a
+foldExpr (Const value) = fromNum value
+foldExpr X = x
+foldExpr (BinaryOp Add a b) = foldExpr a +: foldExpr b
+foldExpr (BinaryOp Subtract a b) = foldExpr a -: foldExpr b
+foldExpr (BinaryOp Multiply a b) = foldExpr a *: foldExpr b
+foldExpr (BinaryOp Divide a b) = foldExpr a /: foldExpr b
+foldExpr (BinaryOp Power _ _) = error "no powers yet"
+foldExpr (Function Sin a) = fsin (foldExpr a)
+foldExpr (Function Cos a) = fcos (foldExpr a)
+foldExpr (Function Atan a) = fatan (foldExpr a)
+foldExpr (Function Exp a) = fe (foldExpr a)
+foldExpr (Function Ln a) = flog (foldExpr a)

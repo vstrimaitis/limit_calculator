@@ -1,11 +1,12 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module Expr
-( Expr(..)
-, Op(..)
-, Fn(..)
-, negate
-) where
+    ( Expr(..)
+    , Op(..)
+    , Fn(..)
+    , negate
+    , substituteX
+    ) where
     
 import Prelude hiding (negate)
 
@@ -34,3 +35,9 @@ data Fn
 
 negate :: Num a => Expr a -> Expr a
 negate = BinaryOp Multiply (Const $ -1)
+
+substituteX :: Expr a -> Expr a -> Expr a
+substituteX with X = with
+substituteX with e@(Const _) = e
+substituteX with (BinaryOp op a b) = BinaryOp op (substituteX with a) (substituteX with b)
+substituteX with (Function fn a) = Function fn (substituteX with a)
