@@ -5,6 +5,7 @@ module Lib
     , check
     ) where
 
+import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 import Expr
 import Prototype
@@ -31,10 +32,10 @@ limitAtZero expr = fromMaybe (fromPositive $ sPos series) (fromNegative $ sNeg s
         series = foldExpr expr
 
         rawFromNegative [] _ = Nothing
-        rawFromNegative (0:xs) (_:ys) = rawFromNegative xs ys
-        rawFromNegative (x:_) (lim:_)
-            | x > 0 = Just lim
-            | otherwise = Just $ flipSign lim
+        rawFromNegative (x:xs) (lim:ys)
+            | x == 0 = rawFromNegative xs ys
+            | x > 0 = rawFromNegative xs ys <|> Just lim
+            | otherwise = rawFromNegative xs ys <|> Just (flipSign lim)
 
         fromNegative coefs = rawFromNegative coefs $ cycle [NoLimit, Known PositiveInfinity]
 
