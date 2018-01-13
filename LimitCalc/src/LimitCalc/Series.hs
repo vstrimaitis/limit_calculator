@@ -178,9 +178,9 @@ intPower s n = if n `mod` 2 == 0 then result else mul result s
         half = mul s s
         result = intPower half (n `div` 2)
 
-makeFunction :: Floating a => (Integer -> a -> a) -> (Series a -> H.Info a) -> Series a -> Result a
+makeFunction :: (Eq a, Floating a) => (Integer -> a -> a) -> (Series a -> H.Info a) -> Series a -> Result a
 makeFunction deriv heur s 
-    | (not . null) (sNeg s) = Left (heur s)
+    | goesToInf s = Left (heur s)
     | otherwise = Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n

@@ -11,7 +11,7 @@ import Data.List (genericLength)
 import Data.Ratio
 import Control.Arrow (left)
 import Control.Applicative
-import Text.Parsec (parse, ParseError)
+import Text.Parsec (parse, try, ParseError)
 import Text.Parsec.Char
 import Text.Parsec.Combinator
 import Text.Parsec.String (Parser)
@@ -49,19 +49,20 @@ expon = do
     spaces
     n <- (num :: Parser Rational)
     return $ case denominator n of
-        1 -> Left $ numerator n
-        _ -> Right $ fromRational n
+        1 -> Left $ numerator n * sign
+        _ -> Right $ fromRational n * fromInteger sign
 
 x :: Parser ()
 x = name "x"
 
-fn :: Parser Expr.Fn
-fn = msum $ (\(n, f) -> name n >> return f) <$>
-    [ ("sin", Expr.Sin)
-    , ("cos", Expr.Cos)
-    , ("atan", Expr.Atan)
-    , ("exp", Expr.Exp)
-    , ("ln", Expr.Ln)
+fn :: Fractional a => Parser (Expr a -> Expr a)
+fn = msum $ (\(n, f) -> try (name n) >> return f) <$>
+    [ ("sin", Expr.Function Expr.Sin)
+    , ("cos", Expr.Function Expr.Cos)
+    , ("atan", Expr.Function Expr.Atan)
+    , ("exp", Expr.Function Expr.Exp)
+    , ("ln", Expr.Function Expr.Ln)
+    , ("sqrt", Expr.squareRoot)
     ]
 
 name :: String -> Parser ()
@@ -76,17 +77,17 @@ term = msum
 
 appl :: Fractional a => Parser (Expr a)
 appl = msum
-    [ Expr.Function <$> fn <* spaces <*> term
-    , pure Expr.negate <* char '-' <* spaces <*> appl
+    [ fn <* spaces <*> term
     , term
     ]
 
 expo :: Fractional a => Parser (Expr a)
 expo = do
+    fixSign <- (char '-' >> spaces >> return Expr.negate) <|> return id
     f <- appl
     t <- fmap Just (spaces >> char '^' >> spaces >> expon) <|> return Nothing
     spaces
-    return $ case t of
+    return $ fixSign $ case t of
         Just (Left int) -> Expr.IntegerPower f int
         Just (Right x) -> Expr.Power f x
         Nothing -> f
