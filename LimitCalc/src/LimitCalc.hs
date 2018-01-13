@@ -7,11 +7,12 @@ import LimitCalc.Expr
 import LimitCalc.Parsing
 import LimitCalc.Limits
 import LimitCalc.Folding
+import LimitCalc.Calc
 
-check :: (Eq a, Ord a, Floating a, Show a) => a -> String -> String
+check :: (Ord a, MaybeSigned a, Floating a, Show a) => a -> String -> String
 check at = either show (show . findLimit (Finite at)) . parseExpr
 
-findLimit :: (Eq a, Ord a, Floating a) => Point a -> Expr a -> Limit a
+findLimit :: (Ord a, MaybeSigned a, Floating a) => Point a -> Expr a -> Calc (Limit a)
 findLimit (Finite x) = limitAtZero . substituteX (BinaryOp Add (Const x) X) . fixPowers
 findLimit PositiveInfinity = limitAtZero . substituteX (overXSquared 1) . fixPowers
 findLimit NegativeInfinity = limitAtZero . substituteX (overXSquared (-1)) . fixPowers

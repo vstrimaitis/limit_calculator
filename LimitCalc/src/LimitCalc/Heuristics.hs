@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module LimitCalc.Heuristics 
     ( Info (Info)
     , infoToLim
@@ -15,6 +17,7 @@ module LimitCalc.Heuristics
     ) where
 
 import LimitCalc.Limits
+import LimitCalc.Calc
 
 newtype Info a = Info {
     iLim :: Limit a
@@ -28,6 +31,9 @@ lift2 f (Info a) (Info b) = Info $ f a b
 
 lift :: (Limit a -> Limit a) -> (Info a -> Info a)
 lift f (Info a) = Info $ f a
+
+liftC :: (Limit a -> Calc (Limit a)) -> (Info a -> Calc (Info a))
+liftC f (Info a) = Info <$> f a
 
 add :: Num a => Info a -> Info a -> Info a
 add = lift2 f
@@ -59,9 +65,10 @@ sub a b = add a (lift neg b)
         neg (HasLimit NegativeInfinity) = HasLimit PositiveInfinity
         neg x = x
 
-mul :: (Ord a, Num a) => Info a -> Info a -> Info a
+mul :: (MaybeSigned a, Num a) => Info a -> Info a -> Info a
 mul = lift2 f
     where
+        f :: (MaybeSigned a, Num a) => Limit a -> Limit a -> Limit a
         f Unknown _ = Unknown
         f _ Unknown = Unknown
         f (HasLimit PositiveInfinity) NoLimit = Unknown
@@ -70,22 +77,26 @@ mul = lift2 f
         f NoLimit (HasLimit NegativeInfinity) = Unknown
         f (HasLimit (Finite _)) NoLimit = Unknown
         f NoLimit (HasLimit (Finite _)) = Unknown
-        f (HasLimit (Finite x)) (HasLimit PositiveInfinity)
-            | x > 0 = HasLimit PositiveInfinity
-            | x < 0 = HasLimit NegativeInfinity
-            | otherwise = Unknown
-        f (HasLimit (Finite x)) (HasLimit NegativeInfinity)
-            | x > 0 = HasLimit NegativeInfinity
-            | x < 0 = HasLimit PositiveInfinity
-            | otherwise = Unknown
-        f (HasLimit PositiveInfinity) (HasLimit (Finite x))
-            | x > 0 = HasLimit PositiveInfinity
-            | x < 0 = HasLimit NegativeInfinity
-            | otherwise = Unknown
-        f (HasLimit NegativeInfinity) (HasLimit (Finite x))
-            | x > 0 = HasLimit NegativeInfinity
-            | x < 0 = HasLimit PositiveInfinity
-            | otherwise = Unknown
+        f (HasLimit (Finite x)) (HasLimit PositiveInfinity) = case getSign x of
+            Just Positive -> HasLimit PositiveInfinity
+            Just Negative -> HasLimit NegativeInfinity
+            Just Zero -> Unknown
+            Nothing -> Unknown
+        f (HasLimit (Finite x)) (HasLimit NegativeInfinity) = case getSign x of
+            Just Positive -> HasLimit NegativeInfinity
+            Just Negative -> HasLimit PositiveInfinity
+            Just Zero -> Unknown
+            Nothing -> Unknown
+        f (HasLimit PositiveInfinity) (HasLimit (Finite x)) = case getSign x of
+            Just Positive -> HasLimit PositiveInfinity
+            Just Negative -> HasLimit NegativeInfinity
+            Just Zero -> Unknown
+            Nothing -> Unknown
+        f (HasLimit NegativeInfinity) (HasLimit (Finite x)) = case getSign x of
+            Just Positive -> HasLimit NegativeInfinity
+            Just Negative -> HasLimit PositiveInfinity
+            Just Zero -> Unknown
+            Nothing -> Unknown
         f (HasLimit (Finite a)) (HasLimit (Finite b)) = HasLimit (Finite (a * b)) 
         f (HasLimit PositiveInfinity) (HasLimit NegativeInfinity) = HasLimit NegativeInfinity
         f (HasLimit NegativeInfinity) (HasLimit PositiveInfinity) = HasLimit NegativeInfinity
@@ -93,16 +104,19 @@ mul = lift2 f
         f (HasLimit PositiveInfinity) (HasLimit PositiveInfinity) = HasLimit PositiveInfinity
         f NoLimit NoLimit = Unknown
 
-divide :: (Ord a, Fractional a) => Info a -> Info a -> Info a
-divide a b = mul a (lift inv b)
+divide :: (MaybeSigned a, Fractional a) => Info a -> Info a -> Calc (Info a)
+divide a b = mul a <$> liftC inv b
     where
-        inv (HasLimit (Finite 0)) = Unknown
-        inv (HasLimit (Finite x)) = HasLimit (Finite (1 / x))
-        inv (HasLimit PositiveInfinity) = HasLimit (Finite 0)
-        inv (HasLimit NegativeInfinity) = HasLimit (Finite 0)
-        inv x = x
+        inv :: (MaybeSigned a, Fractional a) => Limit a -> Calc (Limit a)
+        inv (HasLimit (Finite x)) = case getSign x of
+            Just Zero -> pure Unknown
+            Just _ -> pure $ HasLimit (Finite (1 / x))
+            Nothing -> MissingInfo
+        inv (HasLimit PositiveInfinity) = pure $ HasLimit (Finite 0)
+        inv (HasLimit NegativeInfinity) = pure $ HasLimit (Finite 0)
+        inv x = pure x
 
-intPower :: (Ord a, Num a) => Integer -> Info a -> Info a
+intPower :: Num a => Integer -> Info a -> Info a
 intPower n = lift f
     where
         f NoLimit = Unknown -- atan(1/x)^2, x -> 0
@@ -111,16 +125,19 @@ intPower n = lift f
         f (HasLimit NegativeInfinity) = HasLimit $ if n `mod` 2 == 0 then PositiveInfinity else NegativeInfinity
         f (HasLimit (Finite x)) = HasLimit (Finite (x ^ n))
 
-power :: (Ord a, Floating a) => a -> Info a -> Info a
-power n = lift f
+power :: forall a. (MaybeSigned a, Floating a) => a -> Info a -> Calc (Info a)
+power n = liftC f
     where
-        f NoLimit = NoLimit
-        f Unknown = Unknown
-        f (HasLimit PositiveInfinity) = HasLimit PositiveInfinity
-        f (HasLimit NegativeInfinity) = error "Batai"
-        f (HasLimit (Finite x))
-            | x < 0     = error "Batai"
-            | otherwise = HasLimit (Finite (x ** n))
+        f :: Limit a -> Calc (Limit a)
+        f NoLimit = pure NoLimit
+        f Unknown = pure Unknown
+        f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
+        f (HasLimit NegativeInfinity) = Undefined
+        f (HasLimit (Finite x)) = case getSign x of
+            Just Positive -> pure $ HasLimit (Finite (x ** n))
+            Just Zero -> pure Unknown -- limit might not exist from one side?
+            Just Negative -> Undefined
+            Nothing -> MissingInfo
 
 fsin :: Floating a => Info a -> Info a
 fsin = lift f
@@ -149,16 +166,16 @@ fe = lift f
         f (HasLimit NegativeInfinity) = HasLimit (Finite 0)
         f (HasLimit (Finite x)) = HasLimit (Finite (exp x))
 
-flog :: Floating a => Info a -> Info a
-flog = lift f
+flog :: Floating a => Info a -> Calc (Info a)
+flog = liftC f
     where
-        f NoLimit = NoLimit
-        f Unknown = Unknown
-        f (HasLimit PositiveInfinity) = HasLimit PositiveInfinity
-        f (HasLimit NegativeInfinity) = error "Batai"
-        f (HasLimit (Finite x)) = HasLimit (Finite (log x)) -- x < 0 evil
+        f NoLimit = pure NoLimit
+        f Unknown = pure Unknown
+        f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
+        f (HasLimit NegativeInfinity) = Undefined
+        f (HasLimit (Finite x)) = pure $ HasLimit (Finite (log x)) -- x < 0 evil
 
-fatan :: (Eq a, Floating a) => Info a -> Info a
+fatan :: Floating a => Info a -> Info a
 fatan = lift f
     where
         f NoLimit = NoLimit

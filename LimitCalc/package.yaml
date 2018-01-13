@@ -30,6 +30,8 @@ library:
   - LimitCalc.Expr
   - LimitCalc.Limits
   - LimitCalc.Parsing
+  ghc-options:
+  - -Wno-simplifiable-class-constraints
 
 executables:
   LimitCalc-exe:

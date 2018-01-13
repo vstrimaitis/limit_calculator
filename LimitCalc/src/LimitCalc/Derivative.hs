@@ -20,11 +20,10 @@ tSame term = filter (\t -> tExp t == tExp term)
 tDiff :: (Num a, Eq a) => Term a -> [Term a] -> [Term a]
 tDiff term = filter (\t -> tExp t /= tExp term)
 
-tEval :: (Floating a, Eq a) => Term a -> a -> a
-tEval t a = c * a ** e
+tEval :: Fractional a => Term Integer -> a -> a
+tEval t a = c * a ^ tExp t
     where
-        c = tCoef t
-        e = tExp t
+        c = fromInteger $ tCoef t
 
 dTerm :: (Num a, Eq a) => Term a -> Term a
 dTerm t = Term {tCoef = c, tExp = e}
@@ -69,7 +68,7 @@ pSub (Poly p1) (Poly p2) = pCompress (Poly (p1 ++ map (\t -> t {tCoef = -tCoef t
 pMul :: (Num a, Eq a) => Polynomial a -> Polynomial a -> Polynomial a
 pMul (Poly p1) (Poly p2) = pCompress (Poly [tMul x y | x <- p1, y <- p2])
 
-pEval :: (Floating a, Eq a) => Polynomial a -> a -> a
+pEval :: Fractional a => Polynomial Integer -> a -> a
 pEval (Poly p) a = foldl (\acc t -> acc + tEval t a) 0 p
 
 dPoly :: (Num a, Eq a) => Polynomial a -> Polynomial a
@@ -103,8 +102,8 @@ d :: (Num a, Eq a) => Int -> FracOpt a -> FracOpt a
 d 0 = id
 d n = foldr1 (.) (replicate n dFrac)
 
-fEval :: (Floating a, Eq a) => FracOpt a -> a -> a
-fEval f a = pEval (fTop f) a / pEval (fBottom f) a ** fBottomExp f
+fEval :: Fractional a => FracOpt Integer -> a -> a
+fEval f a = pEval (fTop f) a / pEval (fBottom f) a ^ fBottomExp f
 
 -- data Frac a = Frac {
 --     fTop :: Polynomial a,

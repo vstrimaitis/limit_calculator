@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module LimitCalc.Series
     ( Series
     , Result
@@ -23,6 +25,7 @@ import LimitCalc.Derivative
 import LimitCalc.Expr
 import qualified LimitCalc.Heuristics as H
 import LimitCalc.Limits
+import LimitCalc.Calc
 import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 
@@ -33,21 +36,23 @@ data Series a = Series {
 
 type Result a = Either (H.Info a) (Series a)
 
-seriesToLim :: (Num a, Ord a) => Series a -> Limit a
-seriesToLim s
-    | goesToPInf s = HasLimit PositiveInfinity
-    | goesToNInf s = HasLimit NegativeInfinity
-    | goesToInf  s = NoLimit
-    | otherwise    = HasLimit (Finite (safeHead (sPos s)))
+data Divergence = NegativeInf | PositiveInf | Both
+
+seriesToLim :: (MaybeSigned a, Num a) => Series a -> Calc (Limit a)
+seriesToLim s = (\d -> case d of
+    Just PositiveInf -> HasLimit PositiveInfinity
+    Just NegativeInf -> HasLimit NegativeInfinity
+    Just Both -> NoLimit
+    Nothing -> HasLimit (Finite (safeHead (sPos s)))) <$> divergence s
 
 seriesToCoefs :: Series a -> ([a], [a])
 seriesToCoefs s = (sNeg s, sPos s)
 
-fromNum :: (Num a) => a -> Series a
+fromNum :: Num a => a -> Series a
 fromNum d = Series {sNeg = [], sPos = [d]}
 
-seriesToInfo :: (Ord a, Num a) => Series a -> H.Info a
-seriesToInfo = H.Info . seriesToLim
+seriesToInfo :: (MaybeSigned a, Num a) => Series a -> Calc (H.Info a)
+seriesToInfo = (fmap H.Info) . seriesToLim
 
 justX :: Num a => Series a
 justX = Series {sNeg = [], sPos = [0, 1]}
@@ -151,18 +156,21 @@ mul s1 s2 = mulBy Series {sNeg = [], sPos = a} (-c1-c2)
         c2 = length (sNeg s2)
 
 div1 :: Fractional a => [a] -> [a] -> [a]
-div1 _ [] = error "div by zero"
+div1 _ [] = error "bug: div by zero"
 div1 [] (_:ys) = []
 div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (safeZip (-) xs (map (*(x/y)) ys ))) ys
 
-div2 :: (Eq a, Fractional a) => [a] -> [a] -> Series a
-div2 _ [] = error "im broken too"
-div2 x (0:ys) = mulBy (div2 x ys) (-1)
-div2 x y = Series {sNeg = [], sPos = div1 x y}
+div2 :: (MaybeSigned a, Fractional a) => [a] -> [a] -> Calc (Series a)
+div2 _ [] = Undefined
+div2 x y@(yh:ys) = case isZero yh of
+    Just True -> fmap (flip mulBy (-1)) (div2 x ys)
+    Just False -> pure Series {sNeg = [], sPos = div1 x y}
+    Nothing -> MissingInfo
 
-divide :: (Eq a, Fractional a) => Series a -> Series a -> Series a
-divide s1 s2 = mulBy a (c2-c1)
+divide :: forall a. (MaybeSigned a, Fractional a) => Series a -> Series a -> Calc (Series a)
+divide s1 s2 = fmap (flip mulBy (c2 - c1)) a
     where
+        a :: Calc (Series a)
         a = div2 b1 b2
         b1 = sPos s1'
         b2 = sPos s2'
@@ -171,17 +179,21 @@ divide s1 s2 = mulBy a (c2-c1)
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
-intPower :: (Eq a, Num a) => Series a -> Integer -> Series a
+intPower :: Num a => Series a -> Integer -> Series a
 intPower _ 0 = one
 intPower s n = if n `mod` 2 == 0 then result else mul result s
     where
         half = mul s s
         result = intPower half (n `div` 2)
 
-makeFunction :: Floating a => (Integer -> a -> a) -> (Series a -> H.Info a) -> Series a -> Result a
-makeFunction deriv heur s 
-    | (not . null) (sNeg s) = Left (heur s)
-    | otherwise = Right Series { sNeg = [], sPos = map getCoef [0..] }
+makeFunction :: (MaybeSigned a, Floating a)
+    => (Integer -> a -> a)
+    -> (Divergence -> Calc (H.Info a))
+    -> Series a
+    -> Calc (Result a)
+makeFunction deriv heur s = divergence s >>= \d -> case d of
+    Just d -> Left <$> heur d
+    Nothing -> pure $ Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n
             a = safeHead (sPos s)
@@ -189,30 +201,26 @@ makeFunction deriv heur s
             powers = zipWith (\n -> map (* coef n)) [0..] (iterate (mul_ coefs) [1])
             coef n = deriv n a
 
-goesToInf :: (Num a, Eq a) => Series a -> Bool
-goesToInf s = any ( /= 0) (sNeg s)
-
-goesToPInf :: (Num a, Ord a) => Series a -> Bool
-goesToPInf s = fromMaybe False (go (sNeg s))
+divergence :: MaybeSigned a => Series a -> Calc (Maybe Divergence)
+divergence s = go (sNeg s) $ cycle [Both, PositiveInf]
     where
-        go [] = Nothing
-        go [x] = go [x, 0]
-        go (x:y:xs)
-            | x /= 0 = Just False
-            | y /= 0 = go xs <|> Just (y > 0)
-            | otherwise = go xs
+        go :: MaybeSigned a => [a] -> [Divergence] -> Calc (Maybe Divergence)
+        go [] _ = pure Nothing
+        go (x:xs) (y:ys) = do
+            next <- go xs ys
+            case next of
+                Just div -> pure $ Just div
+                Nothing -> case getSign x of
+                    Just Positive -> pure $ Just y
+                    Just Negative -> pure $ Just $ flipSign y
+                    Just Zero -> pure $ Nothing
+                    Nothing -> MissingInfo
 
-goesToNInf :: (Num a, Ord a) => Series a -> Bool
-goesToNInf s = fromMaybe False (go (sNeg s))
-    where
-        go [] = Nothing
-        go [x] = go [x, 0]
-        go (x:y:xs)
-            | x /= 0 = Just False
-            | y /= 0 = go xs <|> Just (y < 0)
-            | otherwise = go xs
+        flipSign PositiveInf = NegativeInf
+        flipSign NegativeInf = PositiveInf
+        flipSign Both = Both
 
-power :: (Ord a, Floating a) => a -> Series a -> Result a
+power :: (MaybeSigned a, Floating a) => a -> Series a -> Calc (Result a)
 power nn = makeFunction deriv heur
     where
         deriv n a = deriv' n a (a**nn)
@@ -220,13 +228,12 @@ power nn = makeFunction deriv heur
         deriv' 0 a acc = acc
         deriv' n a acc = deriv' (n-1) a (acc * fromInteger n / a)
 
-        heur s
-            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
-            | goesToNInf s = error "Batai"
-            | goesToInf  s = error "Batai"
-            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** nn)))
+        heur d = case d of
+            PositiveInf -> pure $ H.Info $ HasLimit PositiveInfinity
+            NegativeInf -> Undefined
+            Both -> Undefined
 
-fsin :: (Ord a, Floating a) => Series a -> Result a
+fsin :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
     where
         deriv n a
@@ -235,11 +242,9 @@ fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
             | n `mod` 4 == 2 = -(sin a)
             | otherwise = -(cos a)
 
-        heur s
-            | goesToInf s = H.Info NoLimit
-            | otherwise = H.Info (HasLimit (Finite (sin (safeHead (sPos s)))))
+        heur _ = pure $ H.Info NoLimit
             
-fcos :: (Ord a, Floating a) => Series a -> Result a
+fcos :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
     where
         deriv n a
@@ -248,40 +253,35 @@ fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
             | n `mod` 4 == 2 = -(cos a)
             | otherwise = sin a
 
-        heur s
-            | goesToInf s = H.Info NoLimit
-            | otherwise = H.Info (HasLimit (Finite (cos (safeHead (sPos s)))))
+        heur _ = pure $ H.Info NoLimit
 
-fe :: (Ord a, Floating a) => Series a -> Result a
+fe :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fe = makeFunction (\n a -> exp a / fromIntegral (fac n)) heur
     where
-        heur s
-            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
-            | goesToNInf s = H.Info (HasLimit (Finite 0))
-            | goesToInf  s = H.Info NoLimit
-            | otherwise = H.Info (HasLimit (Finite (exp (safeHead (sPos s)))))
+        heur d = pure $ case d of
+            PositiveInf -> H.Info (HasLimit PositiveInfinity)
+            NegativeInf -> H.Info (HasLimit (Finite 0))
+            Both -> H.Info NoLimit
 
-flog :: (Ord a, Floating a) => Series a -> Result a
+flog :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n)) heur
     where
-        heur s
-            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
-            | goesToNInf s = error "batai"
-            | goesToInf  s = error "batai"
-            | otherwise = H.Info (HasLimit (Finite (log (safeHead (sPos s)))))
+        heur d = case d of
+            PositiveInf -> pure $ H.Info (HasLimit PositiveInfinity)
+            NegativeInf -> Undefined
+            Both -> Undefined
 
-fatan :: (Ord a, Floating a) => Series a -> Result a
+fatan :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fatan = makeFunction (\n a -> coefs a !!! n) heur
     where
         coefs a = atan a : [f a x | x <- [0..]]
         base = FracOpt (Poly [Term 1 0]) (Poly [Term 1 2, Term 1 0]) 1
         f a n = fEval (d (fromInteger n) base) a / fromIntegral (fac (n + 1))
 
-        heur s
-            | goesToPInf s = H.Info (HasLimit (Finite (pi/2)))
-            | goesToNInf s = H.Info (HasLimit (Finite (-pi/2)))
-            | goesToInf  s = H.Info NoLimit
-            | otherwise    = H.Info (HasLimit (Finite (atan (safeHead (sPos s)))))
+        heur d = pure $ case d of
+            PositiveInf -> H.Info (HasLimit (Finite (pi/2)))
+            NegativeInf -> H.Info (HasLimit (Finite (-pi/2)))
+            Both -> H.Info NoLimit
 
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
