@@ -183,10 +183,10 @@ makeFunction deriv heur s
     | (not . null) (sNeg s) = Left (heur s)
     | otherwise = Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
-            getCoef n = (foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
+            getCoef n = (foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n)
             a = safeHead (sPos s)
             coefs = 0 : safeTail (sPos s)
-            powers = iterate (mul_ coefs) [1]
+            powers = zipWith (\n -> map (* coef n)) [0..] (iterate (mul_ coefs) [1])
             coef n = deriv n a
 
 goesToInf :: (Num a, Eq a) => Series a -> Bool
