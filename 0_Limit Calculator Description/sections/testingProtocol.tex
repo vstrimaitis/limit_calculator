@@ -1,2 +1,27 @@
 \section{Programos testavimo protokolas}
 
+Testuojama juodosios dežės metodu.
+
+
+\begin{center}
+    \newcommand*\rot{\rotatebox{90}}
+    \newcommand{\x}{$\times$}
+    \newcommand{\green}{\cellcolor{green!50}}
+    \newcommand{\red}{\cellcolor{red!50}}
+    \newcommand{\header}[2]{\textbf{#1} & \multicolumn{3}{c}{\textbf{#2}} & \\ \hline}
+\
+    \begin{longtable}{|m{0.09\textwidth}|m{0.4\textwidth}|m{0.12\textwidth}|m{0.11\textwidth}|m{0.11\textwidth}|}
+    \hline
+        \textbf{Testo numeris} & \textbf{Skaičiuojama riba} &\textbf{Tiketinas rezultatas} & \textbf{Gautas rezultatas} & \textbf{Rezultatas} \\ \hline
+    \endhead
+        \multicolumn{5}{|r|}{{Tęsinys kitame puslapyje}} \\ \hline
+    \endfoot
+    \hline \hline
+    \endlastfoot
+    \header{1}{Paprastų funkcijų ribos}
+    1.1 & lim & 1 & 2  & \green teigiamas \\ \hline
+    1.2 & lim & 1 & 2  & \red neigiamas \\ \hline
+    
+
+    \end{longtable}
+\end{center}
