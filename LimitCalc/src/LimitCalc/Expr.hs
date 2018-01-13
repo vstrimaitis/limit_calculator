@@ -5,11 +5,13 @@ module LimitCalc.Expr
     , Op(..)
     , Fn(..)
     , negate
+    , squareRoot
     , substituteX
     , fixPowers
     ) where
     
 import Prelude hiding (negate)
+import Data.Ratio ((%))
 
 data Expr a
     = Const a
@@ -37,6 +39,9 @@ data Fn
 
 negate :: Num a => Expr a -> Expr a
 negate = BinaryOp Multiply (Const $ -1)
+
+squareRoot :: Fractional a => Expr a -> Expr a
+squareRoot e = Power e (fromRational (1 % 2))
 
 substituteX :: Expr a -> Expr a -> Expr a
 substituteX with X = with

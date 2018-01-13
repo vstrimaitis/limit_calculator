@@ -11,7 +11,7 @@ import Data.List (genericLength)
 import Data.Ratio
 import Control.Arrow (left)
 import Control.Applicative
-import Text.Parsec (parse, ParseError)
+import Text.Parsec (parse, try, ParseError)
 import Text.Parsec.Char
 import Text.Parsec.Combinator
 import Text.Parsec.String (Parser)
@@ -55,13 +55,14 @@ expon = do
 x :: Parser ()
 x = name "x"
 
-fn :: Parser Expr.Fn
-fn = msum $ (\(n, f) -> name n >> return f) <$>
-    [ ("sin", Expr.Sin)
-    , ("cos", Expr.Cos)
-    , ("atan", Expr.Atan)
-    , ("exp", Expr.Exp)
-    , ("ln", Expr.Ln)
+fn :: Fractional a => Parser (Expr a -> Expr a)
+fn = msum $ (\(n, f) -> try (name n) >> return f) <$>
+    [ ("sin", Expr.Function Expr.Sin)
+    , ("cos", Expr.Function Expr.Cos)
+    , ("atan", Expr.Function Expr.Atan)
+    , ("exp", Expr.Function Expr.Exp)
+    , ("ln", Expr.Function Expr.Ln)
+    , ("sqrt", Expr.squareRoot)
     ]
 
 name :: String -> Parser ()
@@ -76,7 +77,7 @@ term = msum
 
 appl :: Fractional a => Parser (Expr a)
 appl = msum
-    [ Expr.Function <$> fn <* spaces <*> term
+    [ fn <* spaces <*> term
     , term
     ]
 
