@@ -49,8 +49,8 @@ expon = do
     spaces
     n <- (num :: Parser Rational)
     return $ case denominator n of
-        1 -> Left $ numerator n
-        _ -> Right $ fromRational n
+        1 -> Left $ numerator n * sign
+        _ -> Right $ fromRational n * fromInteger sign
 
 x :: Parser ()
 x = name "x"
