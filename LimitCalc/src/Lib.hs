@@ -8,12 +8,9 @@ module Lib
 import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 import Expr
-import Prototype
+import Series
 import Parsing
-
-data Point a = Finite a | PositiveInfinity | NegativeInfinity deriving Show
-
-data Limit a = HasLimit (Point a) | NoLimit | Unknown deriving Show
+import Limits
 
 check :: (Eq a, Ord a, Floating a, Show a) => a -> String -> String
 check at = either show (show . findLimit (Finite at)) . parseExpr
@@ -27,9 +24,10 @@ overXSquared :: Num a => a -> Expr a
 overXSquared c = BinaryOp Divide (Const c) (BinaryOp Multiply X X)
 
 limitAtZero :: (Eq a, Ord a, Floating a) => Expr a -> Limit a
-limitAtZero expr = fromMaybe (fromPositive $ sPos series) (fromNegative $ sNeg series)
+limitAtZero expr = fromMaybe fromPositive fromNegative
     where
-        series = foldExpr expr
+        (pos, neg) = seriesToCoefs series
+        series = fromNum 1--foldExpr expr
 
         rawFromNegative [] _ = Nothing
         rawFromNegative (x:xs) (lim:ys)
@@ -37,10 +35,12 @@ limitAtZero expr = fromMaybe (fromPositive $ sPos series) (fromNegative $ sNeg s
             | x > 0 = rawFromNegative xs ys <|> Just lim
             | otherwise = rawFromNegative xs ys <|> Just (flipSign lim)
 
-        fromNegative coefs = rawFromNegative coefs $ cycle [NoLimit, HasLimit PositiveInfinity]
+        fromNegative = rawFromNegative neg $ cycle [NoLimit, HasLimit PositiveInfinity]
 
-        fromPositive [] = HasLimit $ Finite 0
-        fromPositive (x:_) = HasLimit $ Finite x
+        fromPositive = HasLimit $ Finite $
+            case pos of
+                []    -> 0
+                (x:_) -> x
 
         flipSign (HasLimit PositiveInfinity) = HasLimit NegativeInfinity
         flipSign (HasLimit NegativeInfinity) = HasLimit PositiveInfinity

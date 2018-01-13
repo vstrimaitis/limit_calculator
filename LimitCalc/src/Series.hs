@@ -1,12 +1,31 @@
-module Prototype where
+module Series
+    ( Series
+    , seriesToCoefs
+    , fromNum
+    , x
+    , seriesToInfo
+    , add
+    , sub
+    , mul
+    , divide
+    , fsin
+    , fcos
+    , fe
+    , fatan
+    , flog
+    ) where
 
 import Derivative
 import Expr
+import qualified Heuristics as H
 
 data Series a = Series {
     sNeg :: [a],
     sPos :: [a]
 }
+
+seriesToCoefs :: Series a -> ([a], [a])
+seriesToCoefs s = (sNeg s, sPos s)
 
 fromNum :: (Num a) => a -> Series a
 fromNum d = Series {sNeg = [], sPos = [d]}
@@ -65,17 +84,17 @@ instance (Show a, Eq a, Num a) => Show (Series a) where
             joinTerms [x] _ = x
             joinTerms (x:xs) sep = x ++ sep ++ joinTerms xs sep
 
-crazyZip :: Num a => (a -> a -> a) -> [a] -> [a] -> [a]
-crazyZip _ [] [] = []
-crazyZip f [] (y:ys) = crazyZip f [0] (y:ys)
-crazyZip f (x:xs) [] = crazyZip f (x:xs) [0]
-crazyZip f (x:xs) (y:ys) = f x y : crazyZip f xs ys
+safeZip :: Num a => (a -> a -> a) -> [a] -> [a] -> [a]
+safeZip _ [] [] = []
+safeZip f [] (y:ys) = safeZip f [0] (y:ys)
+safeZip f (x:xs) [] = safeZip f (x:xs) [0]
+safeZip f (x:xs) (y:ys) = f x y : safeZip f xs ys
 
-(+:) :: Num a => Series a -> Series a -> Series a
-(+:) s1 s2 = Series { sNeg = crazyZip (+) (sNeg s1) (sNeg s2), sPos = crazyZip (+) (sPos s1) (sPos s2) }
+add :: Num a => Series a -> Series a -> Series a
+add s1 s2 = Series { sNeg = safeZip (+) (sNeg s1) (sNeg s2), sPos = safeZip (+) (sPos s1) (sPos s2) }
 
-(-:) :: Num a => Series a -> Series a -> Series a
-(-:) s1 s2 = Series { sNeg = crazyZip (-) (sNeg s1) (sNeg s2), sPos = crazyZip (-) (sPos s1) (sPos s2) }
+sub :: Num a => Series a -> Series a -> Series a
+sub s1 s2 = Series { sNeg = safeZip (-) (sNeg s1) (sNeg s2), sPos = safeZip (-) (sPos s1) (sPos s2) }
 
 safeHead :: Num a => [a] -> a
 safeHead [] = 0
@@ -94,15 +113,15 @@ mulBy s n
 mul_ :: Num a => [a] -> [a] -> [a]
 mul_ [] _ = []
 mul_ _ [] = []
-mul_ (x:xs) (y:ys) = (x*y) : crazyZip (+) d (0:c)
+mul_ (x:xs) (y:ys) = (x*y) : safeZip (+) d (0:c)
     where
         a = map (*x) ys
         b = map (*y) xs
         c = mul_ xs ys
-        d = crazyZip (+) a b
+        d = safeZip (+) a b
 
-(*:) :: Num a => Series a -> Series a -> Series a
-(*:) s1 s2 = mulBy Series {sNeg = [], sPos = a} (-c1-c2)
+mul :: Num a => Series a -> Series a -> Series a
+mul s1 s2 = mulBy Series {sNeg = [], sPos = a} (-c1-c2)
     where
         a = mul_ b1 b2
         b1 = sPos s1'
@@ -115,15 +134,15 @@ mul_ (x:xs) (y:ys) = (x*y) : crazyZip (+) d (0:c)
 div1 :: Fractional a => [a] -> [a] -> [a]
 div1 _ [] = error "div by zero"
 div1 [] (_:ys) = []
-div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (crazyZip (-) xs (map (*(x/y)) ys ))) ys
+div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (safeZip (-) xs (map (*(x/y)) ys ))) ys
 
 div2 :: (Eq a, Fractional a) => [a] -> [a] -> Series a
 div2 _ [] = error "im broken too"
 div2 x (0:ys) = mulBy (div2 x ys) (-1)
 div2 x y = Series {sNeg = [], sPos = div1 x y}
 
-(/:) :: (Eq a, Fractional a) => Series a -> Series a -> Series a
-(/:) s1 s2 = mulBy a (c2-c1)
+divide :: (Eq a, Fractional a) => Series a -> Series a -> Series a
+divide s1 s2 = mulBy a (c2-c1)
     where
         a = div2 b1 b2
         b1 = sPos s1'
@@ -138,7 +157,7 @@ makeFunction deriv s
     | (not . null) (sNeg s) = error "bad function arg"
     | otherwise = Series { sNeg = [], sPos = map getCoef [0..] }
         where
-            getCoef n = (foldl1 (crazyZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
+            getCoef n = (foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
             a = safeHead (sPos s)
             coefs = 0 : safeTail (sPos s)
             powers = iterate (mul_ coefs) [1]
@@ -181,16 +200,19 @@ fatan = makeFunction (\n a -> coefs a !!! n)
 (_:xs) !!! n = xs !!! (n - 1)
 
 
-foldExpr :: (Eq a, Floating a) => Expr a -> Series a
-foldExpr (Const value) = fromNum value
-foldExpr X = x
-foldExpr (BinaryOp Add a b) = foldExpr a +: foldExpr b
-foldExpr (BinaryOp Subtract a b) = foldExpr a -: foldExpr b
-foldExpr (BinaryOp Multiply a b) = foldExpr a *: foldExpr b
-foldExpr (BinaryOp Divide a b) = foldExpr a /: foldExpr b
-foldExpr (BinaryOp Power _ _) = error "no powers yet"
-foldExpr (Function Sin a) = fsin (foldExpr a)
-foldExpr (Function Cos a) = fcos (foldExpr a)
-foldExpr (Function Atan a) = fatan (foldExpr a)
-foldExpr (Function Exp a) = fe (foldExpr a)
-foldExpr (Function Ln a) = flog (foldExpr a)
+-- foldExpr :: (Eq a, Floating a) => Expr a -> Series a
+-- foldExpr (Const value) = fromNum value
+-- foldExpr X = x
+-- foldExpr (BinaryOp Add a b) = foldExpr a +: foldExpr b
+-- foldExpr (BinaryOp Subtract a b) = foldExpr a -: foldExpr b
+-- foldExpr (BinaryOp Multiply a b) = foldExpr a *: foldExpr b
+-- foldExpr (BinaryOp Divide a b) = foldExpr a /: foldExpr b
+-- foldExpr (BinaryOp Power _ _) = error "no powers yet"
+-- foldExpr (Function Sin a) = fsin (foldExpr a)
+-- foldExpr (Function Cos a) = fcos (foldExpr a)
+-- foldExpr (Function Atan a) = fatan (foldExpr a)
+-- foldExpr (Function Exp a) = fe (foldExpr a)
+-- foldExpr (Function Ln a) = flog (foldExpr a)
+
+seriesToInfo :: Series a -> H.Info a
+seriesToInfo s = undefined
