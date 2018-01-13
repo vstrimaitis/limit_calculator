@@ -47,7 +47,7 @@ x :: Parser ()
 x = name "x"
 
 fn :: Parser Expr.Fn
-fn = msum $ fmap (\(n, f) -> name n >> return f) $
+fn = msum $ (\(n, f) -> name n >> return f) <$>
     [ ("sin", Expr.Sin)
     , ("cos", Expr.Cos)
     , ("atan", Expr.Atan)
