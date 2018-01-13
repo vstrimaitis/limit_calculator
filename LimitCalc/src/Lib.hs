@@ -5,10 +5,7 @@ module Lib
     , check
     ) where
 
-import Control.Applicative ((<|>))
-import Data.Maybe (fromMaybe)
 import Expr
-import Series
 import Parsing
 import Limits
 import Folding

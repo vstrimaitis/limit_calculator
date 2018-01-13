@@ -4,7 +4,7 @@ module Series
     , seriesToCoefs
     , seriesToLim
     , fromNum
-    , x
+    , justX
     , seriesToInfo
     , add
     , sub
@@ -49,8 +49,8 @@ fromNum d = Series {sNeg = [], sPos = [d]}
 seriesToInfo :: (Ord a, Num a) => Series a -> H.Info a
 seriesToInfo = H.Info . seriesToLim
 
-x :: Num a => Series a
-x = Series {sNeg = [], sPos = [0, 1]}
+justX :: Num a => Series a
+justX = Series {sNeg = [], sPos = [0, 1]}
 
 one :: Num a => Series a
 one = fromNum 1
@@ -183,7 +183,7 @@ makeFunction deriv heur s
     | (not . null) (sNeg s) = Left (heur s)
     | otherwise = Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
-            getCoef n = (foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n)
+            getCoef n = foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n
             a = safeHead (sPos s)
             coefs = 0 : safeTail (sPos s)
             powers = zipWith (\n -> map (* coef n)) [0..] (iterate (mul_ coefs) [1])

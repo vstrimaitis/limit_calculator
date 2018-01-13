@@ -62,7 +62,7 @@ fatan (Right a) = S.fatan a
 
 foldExpr :: (Ord a, Floating a) => Expr a -> Result a
 foldExpr (Const value) = Right $ S.fromNum value
-foldExpr X = Right S.x
+foldExpr X = Right S.justX
 foldExpr (BinaryOp Add a b) = foldExpr a `add` foldExpr b
 foldExpr (BinaryOp Subtract a b) = foldExpr a `sub` foldExpr b
 foldExpr (BinaryOp Multiply a b) = foldExpr a `mul` foldExpr b
