@@ -43,6 +43,15 @@ num = do
         makeNum i f = (read i * m + read ('0':f)) % m
             where m = (10 ^ length f) :: Integer
 
+expon :: Fractional a => Parser (Either Integer a)
+expon = do
+    sign <- (char '-' >> return (-1)) <|> return 1
+    spaces
+    n <- (num :: Parser Rational)
+    return $ case denominator n of
+        1 -> Left $ numerator n
+        _ -> Right $ fromRational n
+
 x :: Parser ()
 x = name "x"
 
@@ -73,7 +82,13 @@ appl = msum
     ]
 
 expo :: Fractional a => Parser (Expr a)
-expo = chainr1 appl (makeOp '^' Expr.Power)
+expo = do
+    f <- appl
+    t <- fmap Just (spaces >> char '^' >> spaces >> expon) <|> return Nothing
+    return $ case t of
+        Just (Left int) -> Expr.IntegerPower f int
+        Just (Right x) -> Expr.Power f x
+        Nothing -> f
 
 prod :: Fractional a => Parser (Expr a)
 prod = chainl1 expo (spaces >> (multiply <|> divide))
