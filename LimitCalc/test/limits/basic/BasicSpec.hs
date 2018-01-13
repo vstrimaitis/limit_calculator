@@ -1,4 +1,4 @@
-module BasicSpec where
+module Limits.Basic.BasicSpec where
 
 import Test.Hspec
 

@@ -1,4 +1,4 @@
-module SimpleSpec where
+module Limits.Unstable.SimpleSpec where
 
 import Test.Hspec
 
