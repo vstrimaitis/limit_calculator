@@ -10,6 +10,8 @@ module Heuristics
     , fe
     , fatan
     , flog
+    , power
+    , intPower
     ) where
 
 import Limits
@@ -99,6 +101,26 @@ divide a b = mul a (lift inv b)
         inv (HasLimit PositiveInfinity) = HasLimit (Finite 0)
         inv (HasLimit NegativeInfinity) = HasLimit (Finite 0)
         inv x = x
+
+intPower :: (Ord a, Num a) => Integer -> Info a -> Info a
+intPower n = lift f
+    where
+        f NoLimit = Unknown -- atan(1/x)^2, x -> 0
+        f Unknown = Unknown
+        f (HasLimit PositiveInfinity) = HasLimit PositiveInfinity
+        f (HasLimit NegativeInfinity) = HasLimit $ if n `mod` 2 == 0 then PositiveInfinity else NegativeInfinity
+        f (HasLimit (Finite x)) = HasLimit (Finite (x ^ n))
+
+power :: (Ord a, Floating a) => a -> Info a -> Info a
+power n = lift f
+    where
+        f NoLimit = NoLimit
+        f Unknown = Unknown
+        f (HasLimit PositiveInfinity) = HasLimit PositiveInfinity
+        f (HasLimit NegativeInfinity) = error "Batai"
+        f (HasLimit (Finite x))
+            | x < 0     = error "Batai"
+            | otherwise = HasLimit (Finite (x ** n))
 
 fsin :: Floating a => Info a -> Info a
 fsin = lift f

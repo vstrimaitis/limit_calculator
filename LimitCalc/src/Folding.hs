@@ -30,13 +30,13 @@ divide :: (Ord a, Fractional a) => Result a -> Result a -> Result a
 divide (Right a) (Right b) = Right (S.divide a b)
 divide a b = Left $ H.divide (toInfo a) (toInfo b)
 
-power :: (Ord a, Num a) => Result a -> a -> Result a
-power (Right a) n = Right (S.power a n)
-power (Left a) n = Left $ H.power (toInfo a) n
+power :: (Ord a, Floating a) => Result a -> a -> Result a
+power (Right a) n = S.power n a
+power (Left a) n = Left $ H.power n a
 
 intPower :: (Ord a, Num a) => Result a -> Integer -> Result a
 intPower (Right a) n = Right (S.intPower a n)
-intPower (Left a) n = Left $ H.intPower (toInfo a) n
+intPower (Left a) n = Left $ H.intPower n a
 
 fsin :: (Ord a, Floating a) => Result a -> Result a
 fsin (Left a) = Left $ H.fsin a

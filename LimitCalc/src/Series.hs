@@ -15,6 +15,8 @@ module Series
     , fe
     , fatan
     , flog
+    , power
+    , intPower
     ) where
 
 import Derivative
@@ -210,19 +212,19 @@ goesToNInf s = fromMaybe False (go (sNeg s))
             | y /= 0 = go xs <|> Just (y < 0)
             | otherwise = go xs
 
-power :: (Eq a, Num a) => Series a -> a -> Result a
-power = makeFunction deriv heur
+power :: (Ord a, Floating a) => a -> Series a -> Result a
+power n = makeFunction deriv heur
     where
-        deriv n a = deriv' n a (a**n)
+        deriv n a = deriv' n a (a**fromInteger n)
         
         deriv' 0 a acc = acc
-        deriv' n a acc = deriv' (n-1) a (acc * n / a)
+        deriv' n a acc = deriv' (n-1) a (acc * fromInteger n / a)
 
         heur s
             | goesToPInf s = H.Info (HasLimit PositiveInfinity)
             | goesToNInf s = error "Batai"
             | goesToInf  s = error "Batai"
-            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** a)))
+            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** n)))
 
 fsin :: (Ord a, Floating a) => Series a -> Result a
 fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
