@@ -1,8 +1,31 @@
 \section{Teorinės dalies aprašymas}
 
-\subsection{Teiloro skleidinys}
+%\subsection*{Laipsnių eilutės}
 
-\subsection*{Teiloro begalinis skleidinys}
+%\[\sum_{n=0}^{\infty} a_n(x_n)^n = a_0 + a_1 x + a_2 x^2 + ...\]
+
+%\[\sum_{m=1}^{k} b_m(x_m)^{-m} = b_1 x^{-1} + b_2 x^{-2} + ... + b_k x^{-k}\]
+
+%\[c_n x^n = a_n(x_n)^n + a_{n-1}x^{n-1} \times b_{1}{x} + a_{n+1}(x_{n+1}) \times b_{-1}x^{-1} + ...\]
+
+
+
+
+
+
+
+
+
+
+
+Programos kūrimo metodika pasirinkta laipsnių eilutės. 
+Tai yra Teiloro eilučių praplėtimas, kuriame leidžiame turėti baigtiniį kiekį neigiamų laipsnių. 
+Jeigu skleidžiant įvestį gaunamas begalinis kiekis neigiamų laipsnių, ši metodika nebėra tinkama taikyti norint rasti išraiškos ribą.
+Tokiu atveju, naudojame eurisitinę analizę. 
+
+\subsection{Teiloro eilutės}
+	
+	\subsection*{Teiloro begalinis skleidinys}
 
 \[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + \frac{f'''(a)}{3!}(x-a)^3 + ...\]
 
@@ -14,9 +37,14 @@
 
 \[\lim_{x \to a} f(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k + r_n(x)\]
 
+Tegu funkcija $f$ yra $n+1$ kartą diferencijuojama.
+Tada:
+
 \[r_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x-a)^{n+1} \textrm{ , kur c } \in (a,x) \textrm{ arba c } \in (x,a).\]
 
-\[Jei f^{(n)} \textrm{ tolydi, tai } r_n(x) = o((x-a)^n) \textrm{ , kai } x \to a.\]
+Jei $f^{(n)}$ tolydi, tai:
+
+\[ r_n(x) = o((x-a)^n) \textrm{ , kai } x \to a.\]
 
 \subsection*{Elementarių funkcijų ribų pavyzdžiai}
 
@@ -77,46 +105,6 @@ Kai $a = 0$, tai:
 \[\lim_{x \to 0} \arctan(x) = \arctan(0) + \frac{\frac{1}{0^2+1}}{1!}(x-0) + \frac{\frac{-2*0}{(0^2+1)^2}}{2!}(x-0)^2 + \frac{\frac{6*0^2-2}{(0^2+1)^3}}{3!}(x-0)^3 =\]
 \[= 0 + x + 0 + \frac{1}{3} x^3 +... = x - \frac{x^3}{3} + \frac{x^5}{5} - ... \]
 
-\subsection{Laipsnių eilutės}
-
-\[\sum_{n=0}^{\infty} a_n(x_n)^n = a_0 + a_1 x + a_2 x^2 + ...\]
-
-\[\sum_{m=1}^{k} b_m(x_m)^{-m} = b_1 x^{-1} + b_2 x^{-2} + ... + b_k x^{-k}\]
-
-\[\sum_{n=0}^{\infty} a_n(x_n)^n + \sum_{m=-1}^{-k} a_m(x_m)^m = \sum_{i=-k}^{\infty} a_i(x_i)^i  = a_{-k} x^{-k} + ... + a_{-1} x^{-1} + a_0 + a_1 x + ... \]
-
-\[c_n x^n = a_n(x_n)^n + a_{n-1}x^{n-1} \times b_{1}{x} + a_{n+1}(x_{n+1}) \times b_{-1}x^{-1} + ...\]
-
-\[f(a) + \frac{f'(a)}{1!}(x)+\frac{f''(a)}{2!}(x)^2 + +\frac{f'''(a)}{3!}(x)^3 + ...\]
-
-\[f(a) + \frac{f'(a)}{1!}(S-a)+\frac{f''(a)}{2!}(S-a)^2 + \frac{f'''(a)}{3!}(S-a)^3 + ...\]
-
-$P = (S - a_0)/x$
-
-$S - a_0 = P \times x$
-
-\[f(a) + \frac{f'(a)}{1!}(Px)+\frac{f''(a)}{2!}(Px)^2 + +\frac{f'''(a)}{3!}(Px)^3 + ...\]
-
-\[ g(a,n) = \frac{f^{(n)}(a)}{n!}\]
-
-
-
-
-
-
-
-
-
-
-
-Programos kūrimo metodika pasirinkta laipsnių eilutės. 
-Tai yra Teiloro eilučių praplėtimas, kuriame leidžiame turėti baigtiniį kiekį neigiamų laipsnių. 
-Jeigu skleidžiant įvestį gaunamas begalinis kiekis neigiamų laipsnių, ši metodika nebėra tinkama taikyti norint rasti išraiškos ribą.
-Tokiu atveju, naudojame eurisitinę analizę. 
-
-\subsection{Teiloro eilutės}
-	
-	%TEXT + formules esancios virsuje
 	
 \subsection{Laipsnių eilutės}
 	
