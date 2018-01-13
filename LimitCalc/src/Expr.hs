@@ -40,9 +40,11 @@ negate = BinaryOp Multiply (Const $ -1)
 
 substituteX :: Expr a -> Expr a -> Expr a
 substituteX with X = with
-substituteX with e@(Const _) = e
+substituteX _ e@(Const _) = e
 substituteX with (BinaryOp op a b) = BinaryOp op (substituteX with a) (substituteX with b)
 substituteX with (Function fn a) = Function fn (substituteX with a)
+substituteX with (Power a n) = Power (substituteX with a) n
+substituteX with (IntegerPower a n) = IntegerPower (substituteX with a) n
 
 fixPowers :: (Ord a, Num a) => Expr a -> Expr a
 fixPowers (Const x) = Const x

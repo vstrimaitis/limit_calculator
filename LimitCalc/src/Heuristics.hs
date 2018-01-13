@@ -18,7 +18,7 @@ import Limits
 
 newtype Info a = Info {
     iLim :: Limit a
-}
+} deriving Show
 
 infoToLim :: Info a -> Limit a
 infoToLim = iLim

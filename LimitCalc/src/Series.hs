@@ -213,9 +213,9 @@ goesToNInf s = fromMaybe False (go (sNeg s))
             | otherwise = go xs
 
 power :: (Ord a, Floating a) => a -> Series a -> Result a
-power n = makeFunction deriv heur
+power nn = makeFunction deriv heur
     where
-        deriv n a = deriv' n a (a**fromInteger n)
+        deriv n a = deriv' n a (a**nn)
         
         deriv' 0 a acc = acc
         deriv' n a acc = deriv' (n-1) a (acc * fromInteger n / a)
@@ -224,7 +224,7 @@ power n = makeFunction deriv heur
             | goesToPInf s = H.Info (HasLimit PositiveInfinity)
             | goesToNInf s = error "Batai"
             | goesToInf  s = error "Batai"
-            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** n)))
+            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** nn)))
 
 fsin :: (Ord a, Floating a) => Series a -> Result a
 fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
