@@ -1,9 +1,9 @@
-module Folding (limitAtZero) where
+module LimitCalc.Folding (limitAtZero) where
 
 import LimitCalc.Expr
-import qualified Heuristics as H
-import qualified Series as S
-import Series (Result)
+import qualified LimitCalc.Heuristics as H
+import qualified LimitCalc.Series as S
+import LimitCalc.Series (Result)
 import LimitCalc.Limits
 
 toLimit :: (Num a, Ord a) => Result a -> Limit a

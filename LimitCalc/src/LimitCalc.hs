@@ -6,7 +6,7 @@ module LimitCalc
 import LimitCalc.Expr
 import LimitCalc.Parsing
 import LimitCalc.Limits
-import Folding
+import LimitCalc.Folding
 
 check :: (Eq a, Ord a, Floating a, Show a) => a -> String -> String
 check at = either show (show . findLimit (Finite at)) . parseExpr

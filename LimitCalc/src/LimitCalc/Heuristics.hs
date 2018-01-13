@@ -1,4 +1,4 @@
-module Heuristics 
+module LimitCalc.Heuristics 
     ( Info (Info)
     , infoToLim
     , add

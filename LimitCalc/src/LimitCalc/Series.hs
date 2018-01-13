@@ -1,4 +1,4 @@
-module Series
+module LimitCalc.Series
     ( Series
     , Result
     , seriesToCoefs
@@ -19,9 +19,9 @@ module Series
     , intPower
     ) where
 
-import Derivative
+import LimitCalc.Derivative
 import LimitCalc.Expr
-import qualified Heuristics as H
+import qualified LimitCalc.Heuristics as H
 import LimitCalc.Limits
 import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)

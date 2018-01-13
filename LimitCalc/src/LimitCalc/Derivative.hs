@@ -1,4 +1,4 @@
-module Derivative where
+module LimitCalc.Derivative where
 
 data Term a = Term {
     tCoef :: a,
