@@ -169,6 +169,13 @@ divide s1 s2 = mulBy a (c2-c1)
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
+intPower :: (Eq a, Num a) => Series a -> Integer -> Series a
+intPower _ 0 = one
+intPower s n = if n `mod` 2 == 0 then result else mul result s
+    where
+        half = mul s s
+        result = intPower half (n `div` 2)
+
 makeFunction :: Floating a => (Integer -> a -> a) -> (Series a -> H.Info a) -> Series a -> Result a
 makeFunction deriv heur s 
     | (not . null) (sNeg s) = Left (heur s)
@@ -202,6 +209,20 @@ goesToNInf s = fromMaybe False (go (sNeg s))
             | x /= 0 = Just False
             | y /= 0 = go xs <|> Just (y < 0)
             | otherwise = go xs
+
+power :: (Eq a, Num a) => Series a -> a -> Result a
+power = makeFunction deriv heur
+    where
+        deriv n a = deriv' n a (a**n)
+        
+        deriv' 0 a acc = acc
+        deriv' n a acc = deriv' (n-1) a (acc * n / a)
+
+        heur s
+            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
+            | goesToNInf s = error "Batai"
+            | goesToInf  s = error "Batai"
+            | otherwise    = H.Info (HasLimit (Finite (safeHead (sPos s) ** a)))
 
 fsin :: (Ord a, Floating a) => Series a -> Result a
 fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur

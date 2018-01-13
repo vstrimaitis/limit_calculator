@@ -30,6 +30,14 @@ divide :: (Ord a, Fractional a) => Result a -> Result a -> Result a
 divide (Right a) (Right b) = Right (S.divide a b)
 divide a b = Left $ H.divide (toInfo a) (toInfo b)
 
+power :: (Ord a, Num a) => Result a -> a -> Result a
+power (Right a) n = Right (S.power a n)
+power (Left a) n = Left $ H.power (toInfo a) n
+
+intPower :: (Ord a, Num a) => Result a -> Integer -> Result a
+intPower (Right a) n = Right (S.intPower a n)
+intPower (Left a) n = Left $ H.intPower (toInfo a) n
+
 fsin :: (Ord a, Floating a) => Result a -> Result a
 fsin (Left a) = Left $ H.fsin a
 fsin (Right a) = S.fsin a
@@ -59,7 +67,8 @@ foldExpr (BinaryOp Add a b) = foldExpr a `add` foldExpr b
 foldExpr (BinaryOp Subtract a b) = foldExpr a `sub` foldExpr b
 foldExpr (BinaryOp Multiply a b) = foldExpr a `mul` foldExpr b
 foldExpr (BinaryOp Divide a b) = foldExpr a `divide` foldExpr b
-foldExpr (BinaryOp Power _ _) = error "no powers yet"
+foldExpr (Power a n) = foldExpr a `power` n
+foldExpr (IntegerPower a n) = foldExpr a `intPower` n
 foldExpr (Function Sin a) = fsin (foldExpr a)
 foldExpr (Function Cos a) = fcos (foldExpr a)
 foldExpr (Function Atan a) = fatan (foldExpr a)
