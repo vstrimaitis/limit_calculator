@@ -44,8 +44,8 @@ seriesToCoefs s = (sNeg s, sPos s)
 fromNum :: (Num a) => a -> Series a
 fromNum d = Series {sNeg = [], sPos = [d]}
 
-seriesToInfo :: Series a -> H.Info a
-seriesToInfo s = undefined
+seriesToInfo :: (Ord a, Num a) => Series a -> H.Info a
+seriesToInfo = H.Info . seriesToLim
 
 x :: Num a => Series a
 x = Series {sNeg = [], sPos = [0, 1]}

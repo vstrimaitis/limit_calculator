@@ -10,23 +10,23 @@ toLimit :: (Num a, Ord a) => Result a -> Limit a
 toLimit (Left x) = H.infoToLim x
 toLimit (Right x) = S.seriesToLim x
 
-toInfo :: Result a -> H.Info a
+toInfo :: (Ord a, Num a) => Result a -> H.Info a
 toInfo (Left x) = x
 toInfo (Right x) = S.seriesToInfo x
 
-add :: Num a => Result a -> Result a -> Result a
+add :: (Num a, Ord a) => Result a -> Result a -> Result a
 add (Right a) (Right b) = Right (S.add a b)
 add a b = Left $ H.add (toInfo a) (toInfo b)
 
-sub :: Num a => Result a -> Result a -> Result a
+sub :: (Num a, Ord a) => Result a -> Result a -> Result a
 sub (Right a) (Right b) = Right (S.sub a b)
 sub a b = Left $ H.sub (toInfo a) (toInfo b)
 
-mul :: Num a => Result a -> Result a -> Result a
+mul :: (Ord a, Num a) => Result a -> Result a -> Result a
 mul (Right a) (Right b) = Right (S.mul a b)
 mul a b = Left $ H.mul (toInfo a) (toInfo b)
 
-divide :: (Eq a, Fractional a) => Result a -> Result a -> Result a
+divide :: (Ord a, Fractional a) => Result a -> Result a -> Result a
 divide (Right a) (Right b) = Right (S.divide a b)
 divide a b = Left $ H.divide (toInfo a) (toInfo b)
 
