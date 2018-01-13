@@ -6,6 +6,7 @@ module Expr
     , Fn(..)
     , negate
     , substituteX
+    , fixPowers
     ) where
     
 import Prelude hiding (negate)
