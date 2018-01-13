@@ -1,6 +1,8 @@
 module Series
     ( Series
+    , Result
     , seriesToCoefs
+    , seriesToLim
     , fromNum
     , x
     , seriesToInfo
@@ -18,17 +20,32 @@ module Series
 import Derivative
 import Expr
 import qualified Heuristics as H
+import Limits
+import Control.Applicative ((<|>))
+import Data.Maybe (fromMaybe)
 
 data Series a = Series {
     sNeg :: [a],
     sPos :: [a]
 }
 
+type Result a = Either (H.Info a) (Series a)
+
+seriesToLim :: (Num a, Ord a) => Series a -> Limit a
+seriesToLim s
+    | goesToPInf s = HasLimit PositiveInfinity
+    | goesToNInf s = HasLimit NegativeInfinity
+    | goesToInf  s = NoLimit
+    | otherwise    = HasLimit (Finite (safeHead (sPos s)))
+
 seriesToCoefs :: Series a -> ([a], [a])
 seriesToCoefs s = (sNeg s, sPos s)
 
 fromNum :: (Num a) => a -> Series a
 fromNum d = Series {sNeg = [], sPos = [d]}
+
+seriesToInfo :: Series a -> H.Info a
+seriesToInfo s = undefined
 
 x :: Num a => Series a
 x = Series {sNeg = [], sPos = [0, 1]}
@@ -152,10 +169,10 @@ divide s1 s2 = mulBy a (c2-c1)
         c1 = length (sNeg s1)
         c2 = length (sNeg s2)
 
-makeFunction :: Floating a => (Integer -> a -> a) -> Series a -> Series a
-makeFunction deriv s 
-    | (not . null) (sNeg s) = error "bad function arg"
-    | otherwise = Series { sNeg = [], sPos = map getCoef [0..] }
+makeFunction :: Floating a => (Integer -> a -> a) -> (Series a -> H.Info a) -> Series a -> Result a
+makeFunction deriv heur s 
+    | (not . null) (sNeg s) = Left (heur s)
+    | otherwise = Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = (foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n) * coef n
             a = safeHead (sPos s)
@@ -163,17 +180,44 @@ makeFunction deriv s
             powers = iterate (mul_ coefs) [1]
             coef n = deriv n a
 
-fsin :: Floating a => Series a -> Series a
-fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
+goesToInf :: (Num a, Eq a) => Series a -> Bool
+goesToInf s = any ( /= 0) (sNeg s)
+
+goesToPInf :: (Num a, Ord a) => Series a -> Bool
+goesToPInf s = fromMaybe False (go (sNeg s))
+    where
+        go [] = Nothing
+        go [x] = go [x, 0]
+        go (x:y:xs)
+            | x /= 0 = Just False
+            | y /= 0 = go xs <|> Just (y > 0)
+            | otherwise = go xs
+
+goesToNInf :: (Num a, Ord a) => Series a -> Bool
+goesToNInf s = fromMaybe False (go (sNeg s))
+    where
+        go [] = Nothing
+        go [x] = go [x, 0]
+        go (x:y:xs)
+            | x /= 0 = Just False
+            | y /= 0 = go xs <|> Just (y < 0)
+            | otherwise = go xs
+
+fsin :: (Ord a, Floating a) => Series a -> Result a
+fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
     where
         deriv n a
             | n `mod` 4 == 0 = sin a
             | n `mod` 4 == 1 = cos a
             | n `mod` 4 == 2 = -(sin a)
             | otherwise = -(cos a)
+
+        heur s
+            | goesToInf s = H.Info NoLimit
+            | otherwise = H.Info (HasLimit (Finite (sin (safeHead (sPos s)))))
             
-fcos :: Floating a => Series a -> Series a
-fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
+fcos :: (Ord a, Floating a) => Series a -> Result a
+fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
     where
         deriv n a
             | n `mod` 4 == 0 = cos a
@@ -181,38 +225,42 @@ fcos = makeFunction (\n a -> deriv n a / fromIntegral (fac n))
             | n `mod` 4 == 2 = -(cos a)
             | otherwise = sin a
 
-fe :: Floating a => Series a -> Series a
-fe = makeFunction (\n a -> exp a / fromIntegral (fac n))
+        heur s
+            | goesToInf s = H.Info NoLimit
+            | otherwise = H.Info (HasLimit (Finite (cos (safeHead (sPos s)))))
 
-flog :: Floating a => Series a -> Series a
-flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n))
+fe :: (Ord a, Floating a) => Series a -> Result a
+fe = makeFunction (\n a -> exp a / fromIntegral (fac n)) heur
+    where
+        heur s
+            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
+            | goesToNInf s = H.Info (HasLimit (Finite 0))
+            | goesToInf  s = H.Info NoLimit
+            | otherwise = H.Info (HasLimit (Finite (exp (safeHead (sPos s)))))
 
-fatan :: (Eq a, Floating a) => Series a -> Series a
-fatan = makeFunction (\n a -> coefs a !!! n)
+flog :: (Ord a, Floating a) => Series a -> Result a
+flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n)) heur
+    where
+        heur s
+            | goesToPInf s = H.Info (HasLimit PositiveInfinity)
+            | goesToNInf s = error "batai"
+            | goesToInf  s = error "batai"
+            | otherwise = H.Info (HasLimit (Finite (log (safeHead (sPos s)))))
+
+fatan :: (Ord a, Floating a) => Series a -> Result a
+fatan = makeFunction (\n a -> coefs a !!! n) heur
     where
         coefs a = atan a : [f a x | x <- [0..]]
         base = FracOpt (Poly [Term 1 0]) (Poly [Term 1 2, Term 1 0]) 1
         f a n = fEval (d (fromInteger n) base) a / fromIntegral (fac (n + 1))
 
+        heur s
+            | goesToPInf s = H.Info (HasLimit (Finite (pi/2)))
+            | goesToNInf s = H.Info (HasLimit (Finite (-pi/2)))
+            | goesToInf  s = H.Info NoLimit
+            | otherwise    = H.Info (HasLimit (Finite (atan (safeHead (sPos s)))))
+
 (!!!) :: Num a => [a] -> Integer -> a
 [] !!! _ = 0
 (x:_) !!! 0 = x
 (_:xs) !!! n = xs !!! (n - 1)
-
-
--- foldExpr :: (Eq a, Floating a) => Expr a -> Series a
--- foldExpr (Const value) = fromNum value
--- foldExpr X = x
--- foldExpr (BinaryOp Add a b) = foldExpr a +: foldExpr b
--- foldExpr (BinaryOp Subtract a b) = foldExpr a -: foldExpr b
--- foldExpr (BinaryOp Multiply a b) = foldExpr a *: foldExpr b
--- foldExpr (BinaryOp Divide a b) = foldExpr a /: foldExpr b
--- foldExpr (BinaryOp Power _ _) = error "no powers yet"
--- foldExpr (Function Sin a) = fsin (foldExpr a)
--- foldExpr (Function Cos a) = fcos (foldExpr a)
--- foldExpr (Function Atan a) = fatan (foldExpr a)
--- foldExpr (Function Exp a) = fe (foldExpr a)
--- foldExpr (Function Ln a) = flog (foldExpr a)
-
-seriesToInfo :: Series a -> H.Info a
-seriesToInfo s = undefined

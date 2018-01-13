@@ -1,5 +1,5 @@
 module Heuristics 
-    ( Info
+    ( Info (Info)
     , infoToLim
     , add
     , sub
