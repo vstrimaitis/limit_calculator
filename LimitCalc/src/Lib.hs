@@ -13,7 +13,7 @@ import Parsing
 
 data Point a = Finite a | PositiveInfinity | NegativeInfinity deriving Show
 
-data Limit a = Known (Point a) | NoLimit | Unknown deriving Show
+data Limit a = HasLimit (Point a) | NoLimit | Unknown deriving Show
 
 check :: (Eq a, Ord a, Floating a, Show a) => a -> String -> String
 check at = either show (show . findLimit (Finite at)) . parseExpr
@@ -37,13 +37,13 @@ limitAtZero expr = fromMaybe (fromPositive $ sPos series) (fromNegative $ sNeg s
             | x > 0 = rawFromNegative xs ys <|> Just lim
             | otherwise = rawFromNegative xs ys <|> Just (flipSign lim)
 
-        fromNegative coefs = rawFromNegative coefs $ cycle [NoLimit, Known PositiveInfinity]
+        fromNegative coefs = rawFromNegative coefs $ cycle [NoLimit, HasLimit PositiveInfinity]
 
-        fromPositive [] = Known $ Finite 0
-        fromPositive (x:_) = Known $ Finite x
+        fromPositive [] = HasLimit $ Finite 0
+        fromPositive (x:_) = HasLimit $ Finite x
 
-        flipSign (Known PositiveInfinity) = Known NegativeInfinity
-        flipSign (Known NegativeInfinity) = Known PositiveInfinity
+        flipSign (HasLimit PositiveInfinity) = HasLimit NegativeInfinity
+        flipSign (HasLimit NegativeInfinity) = HasLimit PositiveInfinity
         flipSign other = other
 
 
