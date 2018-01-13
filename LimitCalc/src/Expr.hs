@@ -14,6 +14,7 @@ data Expr a
     = Const a
     | X
     | BinaryOp Op (Expr a) (Expr a)
+    | Power (Expr a) a
     | Function Fn (Expr a)
     deriving (Show, Functor)
 
@@ -22,7 +23,6 @@ data Op
     | Subtract
     | Multiply
     | Divide
-    | Power
     deriving Show
 
 data Fn
