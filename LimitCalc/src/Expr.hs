@@ -15,6 +15,7 @@ data Expr a
     | X
     | BinaryOp Op (Expr a) (Expr a)
     | Power (Expr a) a
+    | IntegerPower (Expr a) Integer
     | Function Fn (Expr a)
     deriving (Show, Functor)
 
