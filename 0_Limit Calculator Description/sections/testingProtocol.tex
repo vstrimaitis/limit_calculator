@@ -6,22 +6,60 @@ Testuojama juodosios dežės metodu.
 \begin{center}
     \newcommand*\rot{\rotatebox{90}}
     \newcommand{\x}{$\times$}
-    \newcommand{\green}{\cellcolor{green!50}}
-    \newcommand{\red}{\cellcolor{red!50}}
+    \newcommand{\green}{\cellcolor{green!50} teigiamas}
+    \newcommand{\red}{\cellcolor{red!50} neigiamas}
     \newcommand{\header}[2]{\textbf{#1} & \multicolumn{3}{c}{\textbf{#2}} & \\ \hline}
 \
     \begin{longtable}{|m{0.09\textwidth}|m{0.4\textwidth}|m{0.12\textwidth}|m{0.11\textwidth}|m{0.11\textwidth}|}
     \hline
-        \textbf{Testo numeris} & \textbf{Skaičiuojama riba} &\textbf{Tiketinas rezultatas} & \textbf{Gautas rezultatas} & \textbf{Rezultatas} \\ \hline
+        \textbf{Testo numeris} & \textbf{Skaičiuojama riba} &\textbf{Tikėtinas rezultatas} & \textbf{Gautas rezultatas} & \textbf{Rezultatas} \\ \hline
     \endhead
         \multicolumn{5}{|r|}{{Tęsinys kitame puslapyje}} \\ \hline
     \endfoot
     \hline \hline
     \endlastfoot
+    \header{0}{pvz}
+    0.1 & lim & 1 & 2  & \green \\ \hline
+    0.2 & lim & 1 & 2  & \red \\ \hline
     \header{1}{Paprastų funkcijų ribos}
-    1.1 & lim & 1 & 2  & \green teigiamas \\ \hline
-    1.2 & lim & 1 & 2  & \red neigiamas \\ \hline
-    
+    1.1 &\[ \lim_{x \to -1} \frac{1}{1+x} \]                                                    & no limit  &           &           \\ \hline
+    1.2 & \[ \lim_{x \to 2} \frac{2^x}{x^2} \]                                                  & 1         &           &           \\ \hline
+    1.3 & \[\lim_{x \to 30}]\ \sqrt[5]{x}\]                                                     & ~1.97     & ~1.97     & \green    \\ \hline
+    1.4 & \[ \lim_{x \to 1.57} cos(2x) \]                                                       & ~-1       &           &           \\ \hline
+    1.5 & \[ \lim_{x \to 0} e^{\frac{1}{x}} \]                                                  & $\infty$  &           &           \\ \hline
+    1.6 & \[ \lim_{x \to 0} \frac{sin(x)}{x} \]                                                 &           &           &           \\ \hline
+    1.7 & \[ \lim_{x \to \infty} \frac{sin(x)}{x}\]                                             &           &           &           \\ \hline
+    1.8 & \[ \lim_{x \to 0} \frac{sin(x)}{cos(x)} \]                                            &           &           &           \\ \hline
+    1.9 & \[ \lim_{x \to \infty} \frac{1}{x} \]                                                 &           &           &           \\ \hline
+    1.10 & \[ \lim_{x \to -\infty} \frac{x^2}{x^4} \]                                           &           &           &           \\ \hline
+    1.11 & \[ \lim_{x \to \infty} \frac{x^{\frac{3}{2}}}{x(\sqrt{x+1}+\sqrt{x-1}+2\sqrt{x})} \] &           &           &           \\ \hline
+    1.12 & \[ \lim_{x \to 0} \frac{e^xsin(x)-x(1+x)}{x^3} \]                                    & 1/3       & 1/3       & \green    \\ \hline
+    1.13 & \[ \lim_{x \to 0} \frac{cos(x)-e^{(-\frac{x^2}{2})}}{x^4} \]                         &           &           &           \\ \hline
+    1.14 & \[ \lim_{x \to 5} (5+x)^5 \]                                                         &           &           &           \\ \hline
+    1.15 & \[ \lim_{x \to 0.785} sin(x) \]                                                      &           &           &           \\ \hline
+
+    \header{2}{Funkcijų kompozicijos ribos}
+    2.1 & $$\lim_{x \to 0} sin({2arctg\frac{1}{x}})$$                                           &           &           &           \\ \hline
+    2.2 & $$\lim_{x \to 0} arctg(\frac{sin(x)}{cos(x)})$$                                       &           &           &           \\ \hline
+    2.2 & $$\lim_{x \to 0} arctg(\frac{e^x-1-x}{x^2})$$                                         & 1/2       & 1/2       & \green    \\ \hline
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     \end{longtable}
 \end{center}
