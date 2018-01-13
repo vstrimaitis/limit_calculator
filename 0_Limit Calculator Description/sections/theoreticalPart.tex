@@ -16,19 +16,19 @@ Tokiu atveju, naudojame eurisitinę analizę.
 
 \subsection{Teiloro eilutės}
 
-	Teiloro skleidiniai yra būdas aproksimuoti funkcijų reikšmes artėjant į konkretų tašką.
-	Pagrindinė apytikslės reikšmės skaičiavimo sąlyga - funkcija privalo būti diferencijuojama norimame intervale.
-	Funkcija keičiama polinomu pasinaudojant teiloro skleidiniu ir pasirinkto taško aplinkoje ji elgiasi pakankamai tiksliai kaip tikroji funkcija.
-	Kadangi skleidinio forma yra begalinė, tikslumą galima laisvai pasirinkti, imant norimą kiekį polinomo narių. 
-	
-	
-	\subsection*{Teiloro begalinis skleidinys}
+	Teiloro skleidiniai yra būdas norimu tikslumu aproksimuoti funkcijų reikšmes artėjant į konkretų tašką.
+	Pagrindinė apytikslės reikšmės skaičiavimo sąlyga - funkcija privalo būti diferencijuojama pasirinkto taško aplinkoje.
+	Funkcija keičiama polinomu pasinaudojant Teiloro skleidiniu.
+	Kadangi skleidinio forma yra begalinė, tikslumą galima laisvai pasirinkti, imant baigtinį kiekį polinomo narių. 
+	Skaičiuojant ribas, bandoma skaičiuti suskaičiuoti pirmujų skleidinio narių reikšmes ir įvertinti likusių narių elgesį. 
 
-\[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + \frac{f'''(a)}{3!}(x-a)^3 + ...\]
+	\subsubsection*{Begalinis skleidinys}
 
-\[\lim_{x \to a} f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n\]
+	\[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + \frac{f'''(a)}{3!}(x-a)^3 + ...\]
 
-\subsection*{Teiloro baigtinis skleidinys}
+	\[\lim_{x \to a} f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n\]
+
+\subsubsection*{Baigtinis skleidinys}
 
 \[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + ... + \frac{f^{(n)}(a)}{n!}(x-a)^n + r_n(x) \]
 
@@ -43,7 +43,7 @@ Jei $f^{(n)}$ tolydi, tai:
 
 \[ r_n(x) = o((x-a)^n) \textrm{ , kai } x \to a.\]
 
-\subsection*{Elementarių funkcijų ribų pavyzdžiai}
+\subsubsection*{Elementarių funkcijų ribos}
 
 Pateikiami funcijų skleidiniai taške $a$ ir $a=0$. 
 
