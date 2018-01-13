@@ -1,4 +1,4 @@
-module Limits where
+module LimitCalc.Limits where
 
 data Point a = Finite a | PositiveInfinity | NegativeInfinity deriving Show
 

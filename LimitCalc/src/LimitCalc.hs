@@ -1,13 +1,11 @@
-module Lib
-    ( Point(..)
-    , Limit(..)
-    , findLimit
+module LimitCalc
+    ( findLimit
     , check
     ) where
 
-import Expr
-import Parsing
-import Limits
+import LimitCalc.Expr
+import LimitCalc.Parsing
+import LimitCalc.Limits
 import Folding
 
 check :: (Eq a, Ord a, Floating a, Show a) => a -> String -> String

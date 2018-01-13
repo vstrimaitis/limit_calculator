@@ -14,7 +14,7 @@ module Heuristics
     , intPower
     ) where
 
-import Limits
+import LimitCalc.Limits
 
 newtype Info a = Info {
     iLim :: Limit a

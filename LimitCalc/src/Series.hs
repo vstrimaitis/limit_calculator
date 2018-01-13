@@ -20,9 +20,9 @@ module Series
     ) where
 
 import Derivative
-import Expr
+import LimitCalc.Expr
 import qualified Heuristics as H
-import Limits
+import LimitCalc.Limits
 import Control.Applicative ((<|>))
 import Data.Maybe (fromMaybe)
 

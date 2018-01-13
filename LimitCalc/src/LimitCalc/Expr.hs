@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 
-module Expr
+module LimitCalc.Expr
     ( Expr(..)
     , Op(..)
     , Fn(..)

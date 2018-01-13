@@ -25,6 +25,11 @@ dependencies:
 
 library:
   source-dirs: src
+  exposed-modules:
+  - LimitCalc
+  - LimitCalc.Expr
+  - LimitCalc.Limits
+  - LimitCalc.Parsing
 
 executables:
   LimitCalc-exe:

@@ -1,10 +1,10 @@
 module Folding (limitAtZero) where
 
-import Expr
+import LimitCalc.Expr
 import qualified Heuristics as H
 import qualified Series as S
 import Series (Result)
-import Limits
+import LimitCalc.Limits
 
 toLimit :: (Num a, Ord a) => Result a -> Limit a
 toLimit (Left x) = H.infoToLim x

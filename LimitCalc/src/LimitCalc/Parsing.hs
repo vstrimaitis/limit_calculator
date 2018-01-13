@@ -1,11 +1,11 @@
-module Parsing
+module LimitCalc.Parsing
     ( parseExpr
     -- , convertError
     -- , ParseError
     ) where
 
-import Expr (Expr)
-import qualified Expr
+import LimitCalc.Expr (Expr)
+import qualified LimitCalc.Expr as Expr
 import Data.Foldable (msum)
 import Data.List (genericLength)
 import Data.Ratio
