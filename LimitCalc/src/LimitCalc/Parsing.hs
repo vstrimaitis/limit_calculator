@@ -77,16 +77,16 @@ term = msum
 appl :: Fractional a => Parser (Expr a)
 appl = msum
     [ Expr.Function <$> fn <* spaces <*> term
-    , pure Expr.negate <* char '-' <* spaces <*> appl
     , term
     ]
 
 expo :: Fractional a => Parser (Expr a)
 expo = do
+    fixSign <- (char '-' >> spaces >> return Expr.negate) <|> return id
     f <- appl
     t <- fmap Just (spaces >> char '^' >> spaces >> expon) <|> return Nothing
     spaces
-    return $ case t of
+    return $ fixSign $ case t of
         Just (Left int) -> Expr.IntegerPower f int
         Just (Right x) -> Expr.Power f x
         Nothing -> f
