@@ -28,7 +28,7 @@ parseExpr :: Fractional a => String -> Either Text.Parsec.ParseError (Expr a)
 parseExpr = {- left convertError . -} parse expr ""
 
 expr :: Fractional a => Parser (Expr a)
-expr = spaces >> chainl1 prod (spaces >> (add <|> subtract))
+expr = spaces >> chainl1 prod (add <|> subtract) <* spaces
     where
         add = makeOp '+' Expr.Add
         subtract = makeOp '-' Expr.Subtract
@@ -85,13 +85,14 @@ expo :: Fractional a => Parser (Expr a)
 expo = do
     f <- appl
     t <- fmap Just (spaces >> char '^' >> spaces >> expon) <|> return Nothing
+    spaces
     return $ case t of
         Just (Left int) -> Expr.IntegerPower f int
         Just (Right x) -> Expr.Power f x
         Nothing -> f
 
 prod :: Fractional a => Parser (Expr a)
-prod = chainl1 expo (spaces >> (multiply <|> divide))
+prod = chainl1 expo (multiply <|> divide) <* spaces
     where
         multiply = makeOp '*' Expr.Multiply
         divide = makeOp '/' Expr.Divide
