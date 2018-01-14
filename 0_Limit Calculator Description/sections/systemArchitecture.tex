@@ -1,3 +1,20 @@
 \section{Sistemos architektūros projektas}
 
+Programos kūrimui pasirinkta Haskell funkcinė programavimo kalba.
+Programos modulių rašymui sukurtas Stack projektas. 
+Būtent ši funkcinė programavimo kalba pasirinkta vietoj procedūrinės ar objektinės dėl kelių priežasčių, kaip: 
+savo tingaus skaičiavimo implementacijos (angl. \textit{Lazy computation}) ir stipri tipų sistema. 
+ 
+Mūsų kuriamą sistemą sudaro: ribų skaičiavimo biblioteka, įvesties funkcijos sintaksinės analizės ir vartotojo sąsajos moduliai. 
+Vartotojo sąsajos modulis atsakingas, jog vartotojas galėtų į programą konsolės sąsajoje 
+įvesti pasirinktą funkciją, kurios ribą nori apskaičiuoti. 
+Taip pat, vartotojui pateikiamas ir gautas apskaičiuotas funkcijos ribos atsakymas, jeigu jį programai gauti pavyko. 
+Kitu atveju, pateikiama, jog riba yra ne skaičius (teigiama ar neigiama begalybė), ji neegzistuoja arba apskaičiuoti nepavyko.
+Įvesties analizės modulis atlieka įvesties formato funkcijos konvertavimo į 
+patogią ribų skaičiavimui programoje tinkamą formą (angl. \textit{parse}). 
+Ribų skaičiavimo biblioteka atsakinga, už įvestos funkcijos skleidimą pasinaudojant Teiloro skleidiniais ir
+mūsų apibrėžtomis - Laipsnių eilutėmis ir euristikomis.
 
+%\[ \lim_{x \to 0} \frac{\frac{sin(x)}{x}-1}{sin^2(x-1) + cos^2(x+1) - 1} \]		& 0				&		& // /hline
+
+%\[ \lim_{x \to 0} \frac{sin^2(x-1) + cos^2(x+1) - 1}{\frac{sin(x)}{x}-1} \]		& \noLimit		&		& // /hline
