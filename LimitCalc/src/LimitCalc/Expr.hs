@@ -12,6 +12,7 @@ module LimitCalc.Expr
     
 import Prelude hiding (negate)
 import Data.Ratio ((%))
+import LimitCalc.Limits
 
 data Expr a
     = Const a
@@ -51,15 +52,15 @@ substituteX with (Function fn a) = Function fn (substituteX with a)
 substituteX with (Power a n) = Power (substituteX with a) n
 substituteX with (IntegerPower a n) = IntegerPower (substituteX with a) n
 
-fixPowers :: (Ord a, Num a) => Expr a -> Expr a
+fixPowers :: (MaybeSigned a, Num a) => Expr a -> Expr a
 fixPowers (Const x) = Const x
 fixPowers X = X
 fixPowers (BinaryOp op a b) = BinaryOp op (fixPowers a) (fixPowers b)
 fixPowers (Function fn a) = Function fn (fixPowers a)
 fixPowers (IntegerPower x a)
     | a == 0 = Const 1
-    | a < 0 = BinaryOp Divide (Const 1) (IntegerPower x (-a))
+    | a < 0 = BinaryOp Divide (Const 1) (IntegerPower (fixPowers x) (-a))
     | otherwise = IntegerPower x a
-fixPowers (Power x a)
-    | a < 0 = BinaryOp Divide (Const 1) (Power x (-a))
-    | otherwise = Power x a
+fixPowers (Power x a) = case getSign a of
+    Just Negative -> BinaryOp Divide (Const 1) (Power (fixPowers x) (-a))
+    _ -> Power (fixPowers x) a
