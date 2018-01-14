@@ -28,7 +28,7 @@ tests =
     
     , Test {tInput = "sin (2*atan (1/x))", tX = Finite 0, tOutput = HasLimit (Finite 0)}
     , Test {tInput = "atan (sin x / cos x)", tX = Finite 0, tOutput = HasLimit (Finite 0)}
-    , Test {tInput = "atan ((exp x - 1 - x) / x^2)", tX = Finite 0, tOutput = HasLimit (Finite 0.5)}
+    , Test {tInput = "atan (exp x - 1 - x) / x^2", tX = Finite 0, tOutput = HasLimit (Finite 0.5)}
     , Test {tInput = "atan (sin x / cos x)", tX = Finite (pi / 2), tOutput = NoLimit}
     , Test {tInput = "x * sin (1/x)", tX = Finite 0, tOutput = HasLimit (Finite 0)}
     , Test {tInput = "sin (4*x) / sin x", tX = Finite 0, tOutput = HasLimit (Finite 4)}
