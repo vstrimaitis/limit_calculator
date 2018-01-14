@@ -1,15 +1,23 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module LimitCalc
-    ( findLimit
+    ( Result(Unknown, OutOfFuel, NoLimit, HasLimit)
+    , findLimit
+    , findLimitWithFuel
     , check
     ) where
 
 import LimitCalc.Expr
 import LimitCalc.Parsing
-import LimitCalc.Limits
+import LimitCalc.Limits hiding (NoLimit, Unknown, HasLimit)
+import qualified LimitCalc.Limits as Limits
 import LimitCalc.Folding
 import LimitCalc.Calc
+
+data Result a = Unknown | OutOfFuel | NoLimit | HasLimit (Point a) deriving Show
+
+defaultFuelAmount :: Integer
+defaultFuelAmount = 100
 
 check :: String -> String -> String
 check at expr = either show show $ do
@@ -17,11 +25,17 @@ check at expr = either show show $ do
     a <- parsePoint at
     return $ findLimit a e
 
-findLimit :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Limit a
-findLimit point expr = case findLimit' point expr of
-    Ok limit -> limit
+findLimitWithFuel :: (MaybeSigned a, Floating a) => Integer -> Point a -> Expr a -> Result a
+findLimitWithFuel fuel point expr = case runCalc (findLimit' point expr) fuel of
     Undefined -> NoLimit
     MissingInfo -> Unknown
+    Ok (Left _) -> OutOfFuel
+    Ok (Right (_, Limits.Unknown)) -> Unknown
+    Ok (Right (_, Limits.NoLimit)) -> NoLimit
+    Ok (Right (_, Limits.HasLimit limit)) -> HasLimit limit
+
+findLimit :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Result a
+findLimit = findLimitWithFuel defaultFuelAmount
 
 findLimit' :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Calc (Limit a)
 findLimit' (Finite x) = limitAtZero . substituteX (BinaryOp Add (Const x) X)

@@ -158,11 +158,11 @@ div1 [] (_:_) = []
 div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (safeZip (-) xs (map (*(x/y)) ys ))) ys
 
 div2 :: (MaybeSigned a, Fractional a) => [a] -> [a] -> Calc (Series a)
-div2 _ [] = Undefined
+div2 _ [] = breakUndefined
 div2 x y@(yh:ys) = case isZero yh of
-    Just True -> fmap (flip mulBy (-1)) (div2 x ys)
+    Just True -> consumeFuel >> fmap (flip mulBy (-1)) (div2 x ys)
     Just False -> pure Series {sNeg = [], sPos = div1 x y}
-    Nothing -> MissingInfo
+    Nothing -> breakUnknown
 
 divide :: forall a. (MaybeSigned a, Fractional a) => Series a -> Series a -> Calc (Series a)
 divide s1 s2 = fmap (flip mulBy (c2 - c1)) a
@@ -212,7 +212,7 @@ divergence s = go (sNeg s) $ cycle [Both, PositiveInf]
                     Just Positive -> pure $ Just y
                     Just Negative -> pure $ Just $ flipSign y
                     Just Zero -> pure $ Nothing
-                    Nothing -> MissingInfo
+                    Nothing -> breakUnknown
 
         flipSign PositiveInf = NegativeInf
         flipSign NegativeInf = PositiveInf
@@ -228,8 +228,8 @@ power nn = makeFunction deriv heur
 
         heur d = case d of
             PositiveInf -> pure $ H.Info $ HasLimit PositiveInfinity
-            NegativeInf -> Undefined
-            Both -> Undefined
+            NegativeInf -> breakUndefined
+            Both -> breakUndefined
 
 fsin :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fsin = makeFunction (\n a -> deriv n a / fromIntegral (fac n)) heur
@@ -266,8 +266,8 @@ flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a **
     where
         heur d = case d of
             PositiveInf -> pure $ H.Info (HasLimit PositiveInfinity)
-            NegativeInf -> Undefined
-            Both -> Undefined
+            NegativeInf -> breakUndefined
+            Both -> breakUndefined
 
 fatan :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fatan = makeFunction (\n a -> coefs a !!! n) heur
