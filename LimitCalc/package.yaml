@@ -44,6 +44,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - LimitCalc
+    - aeson
 
 tests:
   limits:
