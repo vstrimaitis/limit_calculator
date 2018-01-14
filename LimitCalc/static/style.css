@@ -1,0 +1,13 @@
+body{
+    background-color: orange;
+}
+
+#input{
+    display: inline-block;
+    width: 50%
+}
+
+#output{
+    display: inline-block;
+    width: 49%
+}
