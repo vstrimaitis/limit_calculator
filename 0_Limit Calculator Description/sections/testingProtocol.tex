@@ -13,11 +13,12 @@
     
 \begin{center}
     \newcommand*\rot{\rotatebox{90}}
-    \newcommand{\x}{$\times$}
+    \newcommand{\x}{\times}
     \newcommand{\green}{\cellcolor{green!50} teigiamas}
     \newcommand{\red}{\cellcolor{red!50} neigiamas}
     \newcommand{\noLimit}{Riba neegzistuoja}
     \newcommand{~}{$\approx$}
+    \renewcommand{\inf}{$\infty$}
     \newcommand{\header}[2]{\textbf{#1} & \multicolumn{3}{c}{\textbf{#2}} & \\ \hline}
     \begin{longtable}{|m{0.09\textwidth}|m{0.4\textwidth}|m{0.12\textwidth}|m{0.11\textwidth}|m{0.11\textwidth}|}
     \caption{Testavimo rezultatai} \label{tab:rez} \\
@@ -28,6 +29,24 @@
     \endfoot
     \hline \hline
     \endlastfoot
+    \header{0}{Basic}
+    0.0  & \[ \lim_{x \to 30} x \]                                                                      & 1             &               &           \\ \hline
+    0.1  & \[ \lim_{x \to -1} 1+x \]                                                                    & 1             &               &           \\ \hline
+    0.2  & \[ \lim_{x \to \infty} 1-x \]                                                                & -\inf         &               &           \\ \hline
+    0.3  & \[ \lim_{x \to 100\pi} cos(x)+sin(x) \]                                                      & 1             &               &           \\ \hline
+    0.4  & \[ \lim_{x \to 50} e^{ln x} \]                                                               &50             &               &           \\ \hline
+    0.5  & \[ \lim_{x \to \pi} sin(x)cos(x) \]                                                          & 0             &               &           \\ \hline  
+    0.6  & \[ \lim_{x \to 0} \frac{ln(x+1)}{x} \]                                                       & 1             &               &           \\ \hline
+    0.7  & \[ \lim_{x \to 0} \frac{(1+x)^{42}-1}{x}\]                                                   & 42            &               &           \\ \hline
+    0.8  & \[ \lim_{x \to 0} \frac{e^x-1}{x} \]                                                         & 1             &               &           \\ \hline
+    0.9  & \[ \lim_{x \to \infty} \frac{ln(x)}{x^7} \]                                                  & 0             &               &           \\ \hline    
+    0.10 & \[ \lim_{x \to \infty} \frac{e^x}{x^e} \]                                                    & \inf          &               &           \\ \hline
+    0.11 & \[ \lim_{x \to 0} (1+x)^{\frac{1}{x}}\]                                                      & e             &               &           \\ \hline
+    0.12 & \[ \lim_{x \to \infty} (1+\frac{1}{x}^x\]                                                   & e             &               &           \\ \hline
+    0.13 & \[ \lim_{x \to 0} x\x\frac{1}{x} \]                                                          & 1             &               &           \\ \hline
+    0.14 & \[ \lim_{x \to \infty} x\x   \frac{1}{x} \]                                                  & 1             &               &           \\ \hline
+    
+
     \header{1}{Elementarių funkcijų ribos}
     1.1  &\[ \lim_{x \to -1} \frac{1}{1+x} \]                                                           & \noLimit      &               &           \\ \hline
     1.2  & \[ \lim_{x \to 2} \frac{e^{xln2}}{x^2} \]                                                    & 1             &               &           \\ \hline
