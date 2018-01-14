@@ -12,7 +12,6 @@ module LimitCalc.Expr
     
 import Prelude hiding (negate)
 import Data.Ratio ((%), numerator, denominator)
-import LimitCalc.Limits
 
 data Expr a
     = Const a

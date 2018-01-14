@@ -4,6 +4,7 @@ module LimitCalc.Parsing
     , ParseError
     ) where
 
+import Prelude hiding (subtract)
 import LimitCalc.Expr (Expr)
 import qualified LimitCalc.Expr as Expr
 import qualified LimitCalc.Limits as Lim
