@@ -22,6 +22,7 @@ description:         Please see the README on Github at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - parsec >= 3.1.11 && < 4
+- scotty
 
 library:
   source-dirs: src
@@ -30,11 +31,12 @@ library:
   - LimitCalc.Expr
   - LimitCalc.Limits
   - LimitCalc.Parsing
+  - Web
   ghc-options:
   - -Wno-simplifiable-class-constraints
 
 executables:
-  LimitCalc-exe:
+  LimitServer:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
