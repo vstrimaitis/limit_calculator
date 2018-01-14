@@ -77,7 +77,6 @@ foldExpr (BinaryOp Add a b) = lyft add (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Subtract a b) = lyft sub (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Multiply a b) = lyft mul (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Divide a b) = lyft divide (foldExpr a) (foldExpr b)
-foldExpr (Power a n) = flip power n =<< foldExpr a
 foldExpr (IntegerPower a n) = flip intPower n =<< foldExpr a
 foldExpr (Function Sin a) = fsin =<< foldExpr a
 foldExpr (Function Cos a) = fcos =<< foldExpr a

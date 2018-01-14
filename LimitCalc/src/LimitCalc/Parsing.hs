@@ -83,17 +83,19 @@ appl = msum
 
 expo :: Fractional a => Parser (Expr a)
 expo = do
-    fixSign <- (char '-' >> spaces >> return Expr.negate) <|> return id
-    f <- appl
-    t <- fmap Just (spaces >> char '^' >> spaces >> expon) <|> return Nothing
+    base <- appl
     spaces
-    return $ fixSign $ case t of
-        Just (Left int) -> Expr.IntegerPower f int
-        Just (Right x) -> Expr.Power f x
-        Nothing -> f
+    pwr <- (flip Expr.power <$> (char '^' >> spaces >> negated)) <|> return id
+    spaces
+    return $ pwr base
+
+negated :: Fractional a => Parser (Expr a)
+negated = do
+    withSign <- (char '-' >> spaces >> return Expr.negate) <|> return id
+    withSign <$> expo
 
 prod :: Fractional a => Parser (Expr a)
-prod = chainl1 expo (multiply <|> divide) <* spaces
+prod = chainl1 negated (multiply <|> divide) <* spaces
     where
         multiply = makeOp '*' Expr.Multiply
         divide = makeOp '/' Expr.Divide
