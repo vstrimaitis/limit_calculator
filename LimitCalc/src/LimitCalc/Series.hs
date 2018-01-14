@@ -22,12 +22,9 @@ module LimitCalc.Series
     ) where
 
 import LimitCalc.Derivative
-import LimitCalc.Expr hiding (power)
 import qualified LimitCalc.Heuristics as H
 import LimitCalc.Limits
 import LimitCalc.Calc
-import Control.Applicative ((<|>))
-import Data.Maybe (fromMaybe)
 
 data Series a = Series {
     sNeg :: [a],
@@ -65,7 +62,7 @@ fac 0 = 1
 fac n = n * fac (n-1)
 
 instance (Show a, Eq a, Num a) => Show (Series a) where
-    show s = combine (showNeg (sNeg s)) (showPos (sPos s))
+    show series = combine (showNeg (sNeg series)) (showPos (sPos series))
         where
             maxPosTerms = 10
 
@@ -122,11 +119,11 @@ sub s1 s2 = Series { sNeg = safeZip (-) (sNeg s1) (sNeg s2), sPos = safeZip (-) 
 
 safeHead :: Num a => [a] -> a
 safeHead [] = 0
-safeHead (x:xs) = x
+safeHead (x:_) = x
 
 safeTail :: [a] -> [a]
 safeTail [] = []
-safeTail (x:xs) = xs
+safeTail (_:xs) = xs
 
 mulBy :: Num a => Series a -> Int -> Series a
 mulBy s 0 = s
@@ -157,7 +154,7 @@ mul s1 s2 = mulBy Series {sNeg = [], sPos = a} (-c1-c2)
 
 div1 :: Fractional a => [a] -> [a] -> [a]
 div1 _ [] = error "bug: div by zero"
-div1 [] (_:ys) = []
+div1 [] (_:_) = []
 div1 xs@(x:_) ys@(y:_) = x/y : div1 (safeTail (safeZip (-) xs (map (*(x/y)) ys ))) ys
 
 div2 :: (MaybeSigned a, Fractional a) => [a] -> [a] -> Calc (Series a)
@@ -192,7 +189,7 @@ makeFunction :: (MaybeSigned a, Floating a)
     -> Series a
     -> Calc (Result a)
 makeFunction deriv heur s = divergence s >>= \d -> case d of
-    Just d -> Left <$> heur d
+    Just di -> Left <$> heur di
     Nothing -> pure $ Right Series { sNeg = [], sPos = map getCoef [0..] }
         where
             getCoef n = foldl1 (safeZip (+)) (take (fromInteger n + 1) powers) !!! n
@@ -205,11 +202,12 @@ divergence :: MaybeSigned a => Series a -> Calc (Maybe Divergence)
 divergence s = go (sNeg s) $ cycle [Both, PositiveInf]
     where
         go :: MaybeSigned a => [a] -> [Divergence] -> Calc (Maybe Divergence)
+        go _ [] = error "list should have been infinite"
         go [] _ = pure Nothing
         go (x:xs) (y:ys) = do
             next <- go xs ys
             case next of
-                Just div -> pure $ Just div
+                Just di -> pure $ Just di
                 Nothing -> case getSign x of
                     Just Positive -> pure $ Just y
                     Just Negative -> pure $ Just $ flipSign y
@@ -225,7 +223,7 @@ power nn = makeFunction deriv heur
     where
         deriv n a = deriv' n a (a**nn)
         
-        deriv' 0 a acc = acc
+        deriv' 0 _ acc = acc
         deriv' n a acc = deriv' (n-1) a (acc * (nn + 1 - fromInteger n) / (a * fromInteger n))
 
         heur d = case d of
@@ -276,7 +274,7 @@ fatan = makeFunction (\n a -> coefs a !!! n) heur
     where
         coefs a = atan a : [f a x | x <- [0..]]
         base = FracOpt (Poly [Term 1 0]) (Poly [Term 1 2, Term 1 0]) 1
-        f a n = fEval (d (fromInteger n) base) a / fromIntegral (fac (n + 1))
+        f a n = fEval (deri (fromInteger n) base) a / fromIntegral (fac (n + 1))
 
         heur d = pure $ case d of
             PositiveInf -> H.Info (HasLimit (Finite (pi/2)))

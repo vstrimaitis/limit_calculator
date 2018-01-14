@@ -12,11 +12,11 @@ module LimitCalc.Expr
     
 import Prelude hiding (negate)
 import Data.Ratio ((%), numerator, denominator)
-import LimitCalc.Limits
 
 data Expr a
     = Const a
     | X
+    | Pi
     | BinaryOp Op (Expr a) (Expr a)
     | IntegerPower (Expr a) Integer
     | Function Fn (Expr a)
@@ -58,6 +58,7 @@ power a b = case b of
 substituteX :: Expr a -> Expr a -> Expr a
 substituteX with X = with
 substituteX _ e@(Const _) = e
+substituteX _ Pi = Pi
 substituteX with (BinaryOp op a b) = BinaryOp op (substituteX with a) (substituteX with b)
 substituteX with (Function fn a) = Function fn (substituteX with a)
 substituteX with (IntegerPower a n) = IntegerPower (substituteX with a) n
