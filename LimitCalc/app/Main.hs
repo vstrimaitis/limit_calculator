@@ -4,7 +4,6 @@
 module Main where
 
 import Web.Scotty hiding (function)
-import Network.HTTP.Types.Status
 import Control.Monad
 import Text.Read (readMaybe)
 import System.Environment
@@ -39,38 +38,17 @@ instance FromJSON LimitRequest where
     parseJSON = genericParseJSON defaultOptions
         { omitNothingFields = True }
 
-data ErrorType = FunctionParse | PointParse | UnknownLimit | Other deriving (Generic)
-instance ToJSON ErrorType
-instance FromJSON ErrorType
 
-data Error = Error {
-    message  :: String,
-    errType  :: Maybe ErrorType,
-    location :: Maybe Integer
-} deriving (Generic)
-
-instance ToJSON Error where
-    toJSON = genericToJSON defaultOptions
-        { omitNothingFields = True }
-instance FromJSON Error where
-    parseJSON = genericParseJSON defaultOptions
-        { omitNothingFields = True }
-
-data Limit = Limit {
-    hasLimit :: Bool,
-    value :: Maybe String
-} deriving (Generic)
-
-instance ToJSON Limit where
-    toJSON = genericToJSON defaultOptions
-        { omitNothingFields = True }
-instance FromJSON Limit where
-    parseJSON = genericParseJSON defaultOptions
-        { omitNothingFields = True }
+data Result = OK | FunctionParseError | PointParseError | UnknownLimit | UnsupportedOperation deriving (Generic)
+instance ToJSON Result
+instance FromJSON Result
 
 data LimitResponse = LimitResp {
-    error :: Maybe Error,
-    limit :: Maybe Limit
+    result :: Result,
+    errorMessage :: Maybe String,
+    errorLocation :: Maybe Integer,
+    hasLimit :: Maybe Bool,
+    limit :: Maybe String
 } deriving (Generic)
 
 instance ToJSON LimitResponse where
@@ -80,10 +58,11 @@ instance FromJSON LimitResponse where
     parseJSON = genericParseJSON defaultOptions
         { omitNothingFields = True }
 
+emptyResponse = LimitResp {result = OK, errorMessage = Nothing, errorLocation = Nothing, hasLimit = Nothing, limit = Nothing}
+
 server :: ScottyM ()
 server = do
-    get "/" $ do
-        file "./static/index.html"
+    get "/" $ file "./static/index.html"
     post "/api/limits" $ do
         (req :: LimitRequest) <- jsonData
         let expr = function req
@@ -94,30 +73,21 @@ server = do
             _         -> handleInprecise expr pt
 
 handlePrecise expr pt = do
-    status status500
-    text "Precise calculations are not supported yet"
+    json $ emptyResponse {result = UnsupportedOperation, errorMessage = Just "Precise calculations are not supported yet"}
 
 handleInprecise exprStr ptStr = do
     let exprParseResult = P.parseExpr exprStr
     let ptParseResult = P.parsePoint ptStr
     case (exprParseResult, ptParseResult) of
-        (Left err, _) -> json $ buildFunctionParseError err
-        (_, Left err) -> json $ buildPointParseError err
+        (Left err, _) -> json emptyResponse {result = FunctionParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
+        (_, Left err) -> json emptyResponse {result = PointParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (Right expr, Right pt) -> do
             let lim = findLimit pt expr
             json $ buildLimitResponse lim
 
 
-
-emptyResponse = LimitResp Nothing Nothing
-emptyError = Error "" Nothing Nothing
-
-buildFunctionParseError err = emptyResponse{ error = Just Error {message = P.message err, errType = Just FunctionParse, location = Just (P.position err)}}
-
-buildPointParseError err = emptyResponse {error = Just Error {message = P.message err, errType = Just PointParse, location = Just (P.position err)}}
-
-buildLimitResponse Unknown = emptyResponse {error = Just emptyError {message = "Unable to find the limit"}}
-buildLimitResponse NoLimit = emptyResponse {limit = Just Limit {hasLimit = False, value = Nothing}}
-buildLimitResponse (HasLimit PositiveInfinity) = emptyResponse {limit = Just Limit {hasLimit = True, value = Just "+inf"}}
-buildLimitResponse (HasLimit NegativeInfinity) = emptyResponse {limit = Just Limit {hasLimit = True, value = Just "-inf"}}
-buildLimitResponse (HasLimit (Finite lim)) = emptyResponse {limit = Just Limit {hasLimit = True, value = Just (show lim)}}
+buildLimitResponse Unknown = emptyResponse {result = UnknownLimit}
+buildLimitResponse NoLimit = emptyResponse {hasLimit = Just False}
+buildLimitResponse (HasLimit PositiveInfinity) = emptyResponse {hasLimit = Just True, limit = Just "+inf"}
+buildLimitResponse (HasLimit NegativeInfinity) = emptyResponse {hasLimit = Just True, limit = Just "-inf"}
+buildLimitResponse (HasLimit (Finite lim)) = emptyResponse {hasLimit = Just True, limit = Just (show lim)}

@@ -45,7 +45,6 @@ executables:
     dependencies:
     - LimitCalc
     - aeson
-    - http-types
 
 tests:
   limits:
