@@ -226,7 +226,7 @@ power nn = makeFunction deriv heur
         deriv n a = deriv' n a (a**nn)
         
         deriv' 0 a acc = acc
-        deriv' n a acc = deriv' (n-1) a (acc * fromInteger n / a)
+        deriv' n a acc = deriv' (n-1) a (acc * (nn + 1 - fromInteger n) / (a * fromInteger n))
 
         heur d = case d of
             PositiveInf -> pure $ H.Info $ HasLimit PositiveInfinity
