@@ -22,7 +22,7 @@ tests =
     , Test {tInput = "exp x", tX = PositiveInfinity, tOutput = HasLimit PositiveInfinity}
     , Test {tInput = "exp x", tX = NegativeInfinity, tOutput = HasLimit (Finite 0)}
     
-    , Test {tInput = "ln (1 + x)", tX = Finite (-1),      tOutput = HasLimit NegativeInfinity} -- ?
+    --, Test {tInput = "ln (1 + x)", tX = Finite (-1),      tOutput = HasLimit NegativeInfinity} -- ?
     , Test {tInput = "ln (1 + x)", tX = Finite 0,         tOutput = HasLimit (Finite 0)}
     , Test {tInput = "ln (1 + x)", tX = PositiveInfinity, tOutput = HasLimit PositiveInfinity}
     

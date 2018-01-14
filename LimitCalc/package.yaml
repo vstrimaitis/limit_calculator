@@ -54,6 +54,7 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - hspec
+    - LimitCalc
   limits-basic:
     main:                Runner.hs
     source-dirs:
