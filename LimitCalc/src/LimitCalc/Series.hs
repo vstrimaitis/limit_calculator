@@ -22,7 +22,7 @@ module LimitCalc.Series
     ) where
 
 import LimitCalc.Derivative
-import LimitCalc.Expr
+import LimitCalc.Expr hiding (power)
 import qualified LimitCalc.Heuristics as H
 import LimitCalc.Limits
 import LimitCalc.Calc
