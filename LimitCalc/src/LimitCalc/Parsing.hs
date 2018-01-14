@@ -1,7 +1,7 @@
 module LimitCalc.Parsing
     ( parseExpr
     , parsePoint
-    , ParseError
+    , ParseError (..)
     ) where
 
 import Prelude hiding (subtract)
