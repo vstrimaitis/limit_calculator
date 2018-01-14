@@ -1,4 +1,6 @@
 module Main where
 
+import Web
+
 main :: IO ()
-main = putStrLn "foobar"
+main = runServer 3000
