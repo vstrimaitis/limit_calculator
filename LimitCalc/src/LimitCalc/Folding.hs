@@ -73,6 +73,7 @@ lyft f a b = do
 foldExpr :: (MaybeSigned a, Floating a) => Expr a -> Calc (Result a)
 foldExpr (Const value) = pure $ Right $ S.fromNum value
 foldExpr X = pure $ Right S.justX
+foldExpr Pi = pure $ Right $ S.fromNum pi
 foldExpr (BinaryOp Add a b) = lyft add (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Subtract a b) = lyft sub (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Multiply a b) = lyft mul (foldExpr a) (foldExpr b)
