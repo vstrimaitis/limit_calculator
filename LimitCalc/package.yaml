@@ -21,12 +21,21 @@ description:         Please see the README on Github at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- parsec >= 3.1.11 && < 4
+- scotty
 
 library:
   source-dirs: src
+  exposed-modules:
+  - LimitCalc
+  - LimitCalc.Expr
+  - LimitCalc.Limits
+  - LimitCalc.Parsing
+  ghc-options:
+  - -Wno-simplifiable-class-constraints
 
 executables:
-  LimitCalc-exe:
+  LimitServer:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -35,14 +44,53 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - LimitCalc
+    - aeson
 
 tests:
-  LimitCalc-test:
-    main:                Spec.hs
-    source-dirs:         test
+  limits:
+    main:                Runner.hs
+    source-dirs:
+    - test/runners/limits
+    - test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hspec
+    - LimitCalc
+  limits-basic:
+    main:                Runner.hs
+    source-dirs:
+    - test
+    - test/runners/limits/basic
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - LimitCalc
+    - hspec
+  limits-unstable:
+    main:                Runner.hs
+    source-dirs:
+    - test
+    - test/runners/limits/unstable
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - LimitCalc
+    - hspec
+  parser:
+    main:                Runner.hs
+    source-dirs:
+    - test/runners/parser
+    - test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hspec
