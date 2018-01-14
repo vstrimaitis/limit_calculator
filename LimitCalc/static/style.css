@@ -4,10 +4,32 @@ body{
 
 #input{
     display: inline-block;
-    width: 50%
+    width: 50%;
 }
 
 #output{
     display: inline-block;
-    width: 49%
+    width: 50%;
+    font-size: 500%;
+}
+
+#lim{
+    font-size: 1000%;
+}
+
+#xGoes{
+    font-size: 500%;
+}
+
+#function{
+    font-size: 200%;
+}
+
+#xGoesTo{
+    font-size: 150%;
+    width: 15%;
+}
+
+#findLimit{
+    font-size: 200%;
 }
