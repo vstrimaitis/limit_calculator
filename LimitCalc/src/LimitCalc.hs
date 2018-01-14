@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module LimitCalc
     ( findLimit
     , check
@@ -9,8 +11,11 @@ import LimitCalc.Limits
 import LimitCalc.Folding
 import LimitCalc.Calc
 
-check :: (MaybeSigned a, Floating a, Show a) => a -> String -> String
-check at = either show (show . findLimit (Finite at)) . parseExpr
+check :: String -> String -> String
+check at expr = either show show $ do
+    e :: Expr Double <- parseExpr expr
+    a <- parsePoint at
+    return $ findLimit a e
 
 findLimit :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Limit a
 findLimit point expr = case findLimit' point expr of
