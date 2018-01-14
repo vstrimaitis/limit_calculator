@@ -31,7 +31,6 @@ library:
   - LimitCalc.Expr
   - LimitCalc.Limits
   - LimitCalc.Parsing
-  - Web
   ghc-options:
   - -Wno-simplifiable-class-constraints
 
