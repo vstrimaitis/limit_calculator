@@ -18,7 +18,7 @@ function calculate(){
         point: goesTo
     }
 
-    let params = { //add whats missing
+    let params = {
         method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers({
@@ -28,10 +28,7 @@ function calculate(){
 
     fetch(url, params)
     .then(resp => resp.json())
-    .then(response =>{ // parse the last version of response json format
-        console.log(response);
-        console.log(response.result == "FunctionParseError");
-        console.log(response.errorMessage);
+    .then(response =>{
         if(response.result == "OK"){
             if(response.hasLimit == true){
                 if(response.limit == "+inf"){
@@ -64,7 +61,6 @@ function calculate(){
         if(output == "NOT YET CALCULATED."){
             let output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
         }
-
 
         outputField.innerHTML = output;
         if(response.errorMessage != undefined){
