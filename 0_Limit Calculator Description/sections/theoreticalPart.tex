@@ -170,7 +170,45 @@ Tokiu atveju, naudojame eurisitinę analizę.
     Operacijos $f(x)^{g(x)}$ bendru atveju išskleisti negalime. Šiai operacijai atlikti mes ją perrašome į $exp(g(x) \cdotp ln(f(x)))$,
     o šių funkcijų skaičiavimas jau buvo pateiktas aukščiau.
 \subsection{Euristikos}
-	
-	%Toliau euristikos bus
+    Naudojamos dviejų tipų euristikos:
+    \begin{enumerate}
+        \item Reiškinių prastinimas -- pertvarko reiškinius į formas, kurias galima išspręsti naudojantis laipsnių eilutėmis.
+        \item Tarpinės ribos stebėjimas -- naudojama tais atvejais, kai funkcijos išskleisti tikrai nebegalima.
+    \end{enumerate}
+
+    \subsubsection{Reiškinių prastinimas}
+        Skaičiuodami ribą pakeičiame reiškinius į formas, kurias galima išspręsti laipsnių eilutėmis. Visi atliekami pakeitimai
+        yra tokie, kurie nepakeičia funkcijos apibrėžimo srities. Prieš skaičiavimus atliekami šie pertvarkymai:
+        \begin{itemize}
+            \item $f(x) \cdotp c \Longrightarrow c \cdot f(x)$
+            \item $\frac{f(x) \pm g(x)}{h(x)} \Longrightarrow \frac{f(x)}{h(x)} \pm \frac{g(x)}{h(x)}$
+            \item $\frac{e^{f(x)}}{e^{g(x)}} \Longrightarrow e^{f(x)-g(x)}$
+            \item $e^{f(x)} \cdotp e^{g(x)} \Longrightarrow e^{f(x)+g(x)}$
+            \item $\frac{e^{f(x)}}{g(x)} \Longrightarrow \frac{1}{\frac{g(x)}{e^{f(x)}}} $
+            \item $c \cdotp f(x) \pm c \cdotp g(x) \Longrightarrow c \cdotp (f(x) \pm g(x))$
+            \item $c_1 \cdotp f(x) \pm c_2 \cdotp g(x) \Longrightarrow c_1 \cdotp (f(x) \pm g(x)) \pm (c_2 - c_1) \cdot g(x)$
+        \end{itemize}
+
+        Skaičiavimo metu atliekamas dar keli papildomi pertvarkymai (jiems teisingai atlikti reikia žinoti tarpinių
+        reiškinių ribas):
+        \begin{itemize}
+            \item $ln(f(x)) + ln(g(x)) \Longrightarrow ln(f(x) \cdotp g(x))$, jei žinome, kad $\lim_{} f(x) > 0$ ir $\lim_{} g(x) > 0$
+            \item $ln(f(x)) - ln(g(x)) \Longrightarrow ln(\frac{f(x)}{g(x)})$, jei žinome, kad $\lim_{} f(x) > 0$ ir $\lim_{} g(x) > 0$
+        \end{itemize}
+
+    \subsubsection{Tarpinės ribos stebėjimas}
+        Jei negalime išskleisti funkcijos, tada laikome tik tai, ką žinome apie tarpinio reiškinio ribą. Galimi variantai:
+        \begin{itemize}
+            \item Žinome, kokia yra riba
+            \item Žinome, kad ribos nėra
+            \item Nieko nežinome
+        \end{itemize}
+        Jeigu bandome išskleisti reiškinį ir bent vienam iš jo subreiškinių žinome tik šią ribos informaciją, tuomet iš 
+        šio reiškinio subreiškinių informacijos pasiliekame tik ribos informaciją ir patį reiškinį sutraukiame turėdami
+        tik tai.
+
+        Atliekant šiuos žingsnius labai tikėtina gauti atsakymą, kad nieko nežinome. Pavyzdžiui, jei turime reiškinį
+        $f(x) + g(x)$, kur žinome, kad $\lim_{} f(x) = +\infty$ ir $\lim_{} g(x) = -\infty$, tai apie sumos ribą nieko nebežinome.
+
 	
 	
