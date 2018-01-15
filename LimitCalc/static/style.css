@@ -1,0 +1,93 @@
+body{
+    background-color: rgb(62, 122, 161);
+    background-image: url(http://www.wolframcdn.com/homepage/blue-circles-WA2.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;    
+    background-position-x: 50%;
+    background-position-y: 50%;
+}
+
+#input{
+    display: flex;
+    align-items: center;
+    width: 80%;
+}
+
+#lim{
+    font-size: 300%;
+    text-align: center;
+}
+
+#xToLabel{
+    font-size: 150%;
+    width: 50%;
+}
+
+#xTo{
+        font-size: 150%;
+    width: 50%;
+}
+
+#function{
+    font-size: 150%;
+    width: 85%;
+    margin-right: 2px;
+
+}
+
+#calcButton{
+    font-size: 150%;
+    width: 30px;
+    background-color: rgb(248, 130, 33);
+    border: 0px solid rgb(248, 130, 33);
+}
+
+#calcButton:hover{
+    background-color: rgb(206, 22, 8);
+}
+
+#limBlock{
+    width: 20%;
+    flex-direction: column;
+}
+
+#fuctionBlock{
+    width: 75%;
+}
+
+#output{
+    display: inline-block;
+    width: 20%;
+    font-size: 150%;
+    height: 100%;
+}
+
+.if{
+    display: inline-flex;
+}
+
+#centerBlock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.603);
+    padding: 5px;
+    border: 0px solid rgba(37, 37, 37, 0.603);
+    border-radius: 10px;
+}
+
+#error {
+    position: absolute;
+    bottom: 10%;
+}
+
+.fields{
+    border: 2px solid orange;
+    border-radius: 10px;
+}
+
+.fields:focus{
+    outline-width: 0;
+}
