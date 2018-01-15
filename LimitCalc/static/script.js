@@ -1,21 +1,9 @@
 function calculate(){
-    const goesToField = document.getElementById("xTo");
-    let goesTo = goesToField.value;
-
-    const funcField = document.getElementById("function");
-    let func = funcField.value;
-
-    const outputField = document.getElementById("output");
-    let output = "NOT YET CALCULATED.";
-
-    const errorField = document.getElementById("error");
-    let error = "";
-
     const url = "http://www.riboja.me/api/limits"; 
 
     let data = {
-        function: func,
-        point: goesTo
+        function: document.getElementById("function"),
+        point: document.getElementById("xTo").value
     }
 
     let params = {
@@ -28,50 +16,66 @@ function calculate(){
 
     fetch(url, params)
     .then(resp => resp.json())
-    .then(response =>{
-        if(response.result == "OK"){
-            if(response.hasLimit == true){
-                if(response.limit == "+inf"){
-                    output = "+∞";
-                }else if(response.limit == "+inf"){
-                    output = "-∞";
-                }else{
-                    output = round(response.limit);
-                }
-            }else{
-                output = "Riba neegzistuoja";
-            }
-        }else if(response.result == "FunctionParseError"){
-            output = "Klaida: Neteisingai įvesta funkcija.";
-            error = response.errorMessage;
-        }else if(response.result == "PointParseError"){
-            output = "Klaida: Neteisingai įvestas taškas.";
-            error = response.errorMessage;
-        }else if(response.result == "UnknownLimit"){
-            output = "Klaida: Nepavyko išanazlizuoti ribos.";
-        }else if(response.result == "RanOutOfFuel"){
-            output = "Klaida: Baigėsi kuras.";
-        }else if(response.result == "UnsupportedOperation"){
-            output = "Klaida: Nepalaikoma operacija.";
-            error = response.errorMessage;
-        }else if(response.result == "FunctionUndefined"){
-            output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
-        }
-        
-        if(output == "NOT YET CALCULATED."){
-            let output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
-        }
-
-        outputField.innerHTML = output;
-        if(response.errorMessage != undefined){
-            errorField.innerHTML = "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + error;
-        }else{
-            errorField.innerHTML = "";
-        }
-    })
-
+    .then(response =>handleReponse(response))
 }
 
+function handleReponse(response){
+    switch(response.result) {
+        case "OK":{
+            output = getLimitValue(response);
+            break;
+        }
+        case "FunctionParseError": {
+            output = "Klaida: Neteisingai įvesta funkcija.";
+            break;
+        }
+        case "PointParseError": {
+            output = "Klaida: Neteisingai įvestas taškas.";
+            break;
+        }
+        case "UnknownLimit": {
+            output = "Klaida: Nepavyko išanazlizuoti ribos.";
+            break;
+        }
+        case "RanOutOfFuel": {
+            output = "Klaida: Baigėsi kuras.";
+            break;
+        }
+        case "UnsupportedOperation": {
+            output = "Klaida: Nepalaikoma operacija.";
+            break;
+        }
+        case "FunctionUndefined":  {
+            output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
+            break;
+        }
+        default: {
+            output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
+            break;
+        }
+    }
+    setResult(output, response);
+}
+
+function setResult(output, response){
+    document.getElementById("output").innerHTML = output;
+    document.getElementById("error").innerHTML =  response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
+}
+
+
+function getLimitValue(response){
+    if (response.hasLimit == true) {
+        if(response.limit == "+inf"){
+            return  "+∞";
+        }else if(response.limit == "+inf"){
+            return "-∞";
+        }else{
+            return round(response.limit);
+        }
+    } else{
+        return "Riba neegzistuoja";
+    }
+}
 
 function round(numberString) {
     const precision = 8;
