@@ -6,25 +6,27 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
-		<div id="content" class="if">
-		<div id="input">
-			<form onsubmit="calculate(); return false;">
-				<div id="limBlock" class="if">
-					<label id="lim">
-						lim 
-					</label>
-					<div>
-						<label id="xToLabel">
-							x→
-						</label>
-						<input id="xTo" type="text" name="xGoesTo" required>
-					</div>
-				</div><div id="fuctionBlock" class="if">
-					<input id="function" type="text" name="function" required>
-					<input id="calcButton" type="submit" name="findLimit" value="="> 
-				</div>
-			</form>
-			</div><div id="output"/>
+		<div id="centerBlock">
+			<div id="content" class="if">
+				<div id="input">
+					<form onsubmit="calculate(); return false;">
+						<div id="limBlock" class="if">
+							<label id="lim">
+								lim 
+							</label>
+							<div>
+								<label id="xToLabel">
+									x→
+								</label>
+								<input id="xTo" type="text" name="xGoesTo" required>
+							</div>
+						</div><div id="fuctionBlock" class="if">
+							<input id="function" type="text" name="function" required>
+							<input id="calcButton" type="submit" name="findLimit" value="="> 
+						</div>
+					</form>
+				</div><div id="output"/>
+			</div>
 		</div>
 		<div id="error"/>
 		<script src="script.js"></script>
