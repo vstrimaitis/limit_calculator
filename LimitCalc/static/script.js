@@ -2,7 +2,7 @@ function calculate(){
     const url = "http://www.riboja.me/api/limits"; 
 
     let data = {
-        function: document.getElementById("function"),
+        function: document.getElementById("function").value,
         point: document.getElementById("xTo").value
     }
 
@@ -61,7 +61,6 @@ function setResult(output, response){
     document.getElementById("output").innerHTML = output;
     document.getElementById("error").innerHTML =  response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
-
 
 function getLimitValue(response){
     if (response.hasLimit == true) {
