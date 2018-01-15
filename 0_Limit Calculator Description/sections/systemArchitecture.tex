@@ -1,0 +1,27 @@
+\section{Sistemos architektūra}
+
+Programos kūrimui pasirinkta Haskell programavimo kalba bei Stack projektų valdymo įrankis.
+Kūrimui buvo pasirinkta Haskell programavimo kalba dėl šių priežasčių:
+\begin{enumerate}
+    \item Tingus skaičiavimas (angl. \textit{Lazy evaluation}). Haskell programavimo kalboje galima aprašyti begalines
+        duomenų struktūras, o veikimo metu jų sukonstruojama tik tokia dalis, kokia reikalinga, norint rasti atsakymą.
+        Pavyzdžiui, galime aprašyti, kad reiškinys turi begalinį Teiloro skleidinį, tačiau jį spausdinant reikalingas
+        tik pirmasis narys, todėl tik vienas narys ir bus suskaičiuotas.
+    \item Stipri tipų sistema. Haskell tipų sistema leidžia rašyti lengvai komponuojamą ir pernaudojamą kodą. Pavyzdžiui,
+        skaičiavimą galima pritaikyti taip, kad būtų naudojami tiek apytiksliai, tiek visiškai tikslūs skaičiai. Taip pat
+        nesunku valdyti skaičiavimo metu vykstančius efektus, pavyzdžiui, kai randame, kad kažkokia funkcijos dalis yra
+        neapibrėžta, arba neturime informacijos žingsnio atlikimui ir būtinai turime viską nutraukti.
+    \item Funkcinė programavimo kalba iš prigimties tinkama matematinių skaičiavimų modeliavimui.
+\end{enumerate}
+
+Siekiant palengvinti funkcionalumo perpanaudojamumą, sistemą suskirstyta į keturis modulius, kurių kiekvienas atlieka
+tarpusavyje nesusijusias funkcijas. Sistema moduliai yra šie:
+\begin{enumerate}
+    \item Ribų skaičiavimo modulis. Tai -- pagrindinė sistemos dalis, kuri atsakinga už pačių ribų skaičiavimą.
+    \item Sintaksinės analizės modulis (angl. \textit{parser}). Šis modulis atlieka vertimą iš vartotojo įvesto teksto į
+        ribų skaičiavimo moduliui suprantamą duomenų formatą.
+    \item Internetinio serverio modulis. Šis modulis leidžia kviesti biblioteką naudojant REST API bei pateikia vartotojo
+        sąsają, kad vartotojams ją būtų galima pasiekti naršyklėje.
+    \item Vartotojo sąsajos modulis. Tai -- internetinis puslapis, sąveikaujantis su anksčiau minėtu internetiniu serveriu,
+        kad vartotojas visą funkcionalumą galėtų pasiekti naršyklėje.
+\end{enumerate}

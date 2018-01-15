@@ -51,7 +51,7 @@ pCompress (Poly p) = pCompress' p []
     where
         pCompress' :: (Num a, Eq a) => [Term a] -> [Term a] -> Polynomial a
         pCompress' [] acc = Poly (filter (\t -> tCoef t /= 0) acc)
-        pCompress' terms@(x:xs) acc = pCompress' (tDiff x terms) (combine (tSame x terms) : acc) 
+        pCompress' terms@(x:_) acc = pCompress' (tDiff x terms) (combine (tSame x terms) : acc) 
 
         combine :: (Num a, Eq a) => [Term a] -> Term a
         combine [] = Term {tCoef = 0, tExp = 0}
@@ -98,9 +98,9 @@ dFrac frac = FracOpt {fTop = t, fBottom = v, fBottomExp = n + 1}
         t = pSub (pMul u' v) (pMul (pMul (Poly [Term n 0]) u) v')
 
 
-d :: (Num a, Eq a) => Int -> FracOpt a -> FracOpt a
-d 0 = id
-d n = foldr1 (.) (replicate n dFrac)
+deri :: (Num a, Eq a) => Int -> FracOpt a -> FracOpt a
+deri 0 = id
+deri n = foldr1 (.) (replicate n dFrac)
 
 fEval :: Fractional a => FracOpt Integer -> a -> a
 fEval f a = pEval (fTop f) a / pEval (fBottom f) a ^ fBottomExp f

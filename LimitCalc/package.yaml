@@ -29,9 +29,9 @@ library:
   exposed-modules:
   - LimitCalc
   - LimitCalc.Expr
-  - LimitCalc.Limits
   - LimitCalc.Parsing
-  - Web
+  - LimitCalc.Point
+  - LimitCalc.Sign
   ghc-options:
   - -Wno-simplifiable-class-constraints
 
@@ -45,6 +45,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - LimitCalc
+    - aeson
 
 tests:
   limits:

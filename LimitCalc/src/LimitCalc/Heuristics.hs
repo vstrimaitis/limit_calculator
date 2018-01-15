@@ -16,6 +16,8 @@ module LimitCalc.Heuristics
     , intPower
     ) where
 
+import LimitCalc.Sign
+import LimitCalc.Point
 import LimitCalc.Limits
 import LimitCalc.Calc
 
@@ -32,7 +34,7 @@ lift2 f (Info a) (Info b) = Info $ f a b
 lift :: (Limit a -> Limit a) -> (Info a -> Info a)
 lift f (Info a) = Info $ f a
 
-liftC :: (Limit a -> Calc (Limit a)) -> (Info a -> Calc (Info a))
+liftC :: Functor f => (Limit a -> f (Limit a)) -> Info a -> f (Info a)
 liftC f (Info a) = Info <$> f a
 
 add :: Num a => Info a -> Info a -> Info a
@@ -111,7 +113,7 @@ divide a b = mul a <$> liftC inv b
         inv (HasLimit (Finite x)) = case getSign x of
             Just Zero -> pure Unknown
             Just _ -> pure $ HasLimit (Finite (1 / x))
-            Nothing -> MissingInfo
+            Nothing -> breakUnknown
         inv (HasLimit PositiveInfinity) = pure $ HasLimit (Finite 0)
         inv (HasLimit NegativeInfinity) = pure $ HasLimit (Finite 0)
         inv x = pure x
@@ -132,12 +134,12 @@ power n = liftC f
         f NoLimit = pure NoLimit
         f Unknown = pure Unknown
         f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
-        f (HasLimit NegativeInfinity) = Undefined
+        f (HasLimit NegativeInfinity) = breakUndefined
         f (HasLimit (Finite x)) = case getSign x of
             Just Positive -> pure $ HasLimit (Finite (x ** n))
             Just Zero -> pure Unknown -- limit might not exist from one side?
-            Just Negative -> Undefined
-            Nothing -> MissingInfo
+            Just Negative -> breakUndefined
+            Nothing -> breakUnknown
 
 fsin :: Floating a => Info a -> Info a
 fsin = lift f
@@ -172,7 +174,7 @@ flog = liftC f
         f NoLimit = pure NoLimit
         f Unknown = pure Unknown
         f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
-        f (HasLimit NegativeInfinity) = Undefined
+        f (HasLimit NegativeInfinity) = breakUndefined
         f (HasLimit (Finite x)) = pure $ HasLimit (Finite (log x)) -- x < 0 evil
 
 fatan :: Floating a => Info a -> Info a

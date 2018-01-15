@@ -5,8 +5,10 @@ import qualified LimitCalc.Heuristics as H
 import qualified LimitCalc.Series as S
 import LimitCalc.Series (Result)
 import LimitCalc.Limits
+import LimitCalc.Point
+import LimitCalc.Sign
 import LimitCalc.Calc
-import Control.Monad (liftM2, (>=>))
+import Control.Monad ((>=>))
 
 toLimit :: (MaybeSigned a, Num a) => Result a -> Calc (Limit a)
 toLimit (Left x) = pure $ H.infoToLim x
@@ -35,10 +37,6 @@ divide a b = Left <$> do
     bb <- toInfo b
     H.divide aa bb
 
-power :: (MaybeSigned a, Floating a) => Result a -> a -> Calc (Result a)
-power (Right a) n = S.power n a
-power (Left a) n = Left <$> H.power n a
-
 intPower :: (MaybeSigned a, Num a) => Result a -> Integer -> Calc (Result a)
 intPower (Right a) n = pure $ Right (S.intPower a n)
 intPower (Left a) n = pure $ Left $ H.intPower n a
@@ -63,7 +61,6 @@ fatan :: (MaybeSigned a, Floating a) => Result a -> Calc (Result a)
 fatan (Left a) = pure $ Left $ H.fatan a
 fatan (Right a) = S.fatan a
 
-
 lyft :: Monad m => (a -> b -> m c) -> m a -> m b -> m c
 lyft f a b = do
     a' <- a
@@ -73,11 +70,11 @@ lyft f a b = do
 foldExpr :: (MaybeSigned a, Floating a) => Expr a -> Calc (Result a)
 foldExpr (Const value) = pure $ Right $ S.fromNum value
 foldExpr X = pure $ Right S.justX
+foldExpr Pi = pure $ Right $ S.fromNum pi
 foldExpr (BinaryOp Add a b) = lyft add (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Subtract a b) = lyft sub (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Multiply a b) = lyft mul (foldExpr a) (foldExpr b)
 foldExpr (BinaryOp Divide a b) = lyft divide (foldExpr a) (foldExpr b)
-foldExpr (Power a n) = flip power n =<< foldExpr a
 foldExpr (IntegerPower a n) = flip intPower n =<< foldExpr a
 foldExpr (Function Sin a) = fsin =<< foldExpr a
 foldExpr (Function Cos a) = fcos =<< foldExpr a
