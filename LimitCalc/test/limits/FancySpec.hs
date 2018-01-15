@@ -37,6 +37,22 @@ tests =
     
     , Test {tInput = "((sin (x-1))^2 + (cos (x+1))^2 - 1) / (sin x / x - 1)", tX = Finite 0, tOutput = NoLimit}
     , Test {tInput = "(sin x / x - 1) / ((sin (x-1))^2 + (cos (x+1))^2 - 1)", tX = Finite 0, tOutput = HasLimit (Finite 0)}
+
+    , Test {tInput = "x", tX = Finite 30, tOutput = HasLimit (Finite 30)}
+    , Test {tInput = "1 + x", tX = Finite (-1), tOutput = HasLimit (Finite 1)}
+    , Test {tInput = "1 - x", tX = PositiveInfinity, tOutput = HasLimit NegativeInfinity}
+    , Test {tInput = "cos (x)  + sin(x)", tX = Finite (100 * pi) , tOutput = HasLimit (Finite 1)}
+    , Test {tInput = "exp (ln x)", tX = Finite (50) , tOutput = HasLimit (Finite 50)}
+    , Test {tInput = "sin x * cos x", tX = Finite (pi) , tOutput = HasLimit (0)}
+    , Test {tInput = "ln (x + 1) / x", tX = Finite (0) , tOutput = HasLimit (1)}
+    , Test {tInput = "( (1 + x)^42 - 1) / x", tX = Finite (0) , tOutput = HasLimit (0)}
+    , Test {tInput = "(e^x - 1) / x", tX = Finite (0) , tOutput = HasLimit (1)}
+    , Test {tInput = "ln x / x^7", tX = PositiveInfinity , tOutput = HasLimit (0)}
+    , Test {tInput = "e^x / x^e", tX = PositiveInfinity , tOutput = HasLimit PositiveInfinity}
+    , Test {tInput = "(1 + x)^(1 / x)", tX = PositiveInfinity , tOutput = HasLimit {Finite e}
+    , Test {tInput = "(1 + 1 / x)^(x)", tX = PositiveInfinity , tOutput = HasLimit {Finite e}
+    , Test {tInput = "x *  (1 / x)", tX = Finite (0) , tOutput = HasLimit {Finite 1}
+    , Test {tInput = "x *  (1 / x)", tX = PositiveInfinity, tOutput = HasLimit {Finite 1}
     ]
 
 spec :: Spec
