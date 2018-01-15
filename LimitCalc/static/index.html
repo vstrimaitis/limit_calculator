@@ -5,24 +5,29 @@
 		<title>Limitless limit calc (Limited edition)</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
-	</body>
+	<body>
 		<div id="input">
 			<form onsubmit="return false;">
-				<label id="lim">
-					lim 
-				</label>
-				<input id="function" type="text" name="function" required>
-				<input id="calcButton" type="submit" name="findLimit" value="=" onclick="calculate()"> 
-				<br>
-				<label id="xToLabel">
-					x→
-				</label>
-				<input id="xTo" type="text" name="xGoesTo" required>
-				
+				<div id="limBlock" class="ib">
+					<label id="lim">
+						lim 
+					</label>
+					<div>
+						<label id="xToLabel">
+							x→
+						</label>
+						<input id="xTo" type="text" name="xGoesTo" required>
+					</div>
+				</div>
+				<div id="fuctionBlock" class="ib">
+					<input id="function" type="text" name="function" required>
+					<input id="calcButton" type="submit" name="findLimit" value="=" onclick="calculate()"> 
+				</div>
 			</form>
 		</div><div id="output">
-			ATS
+			ats
 		</div>
+		<div id="error"/>
 		<script src="script.js"></script>
 	</body>
 </html>

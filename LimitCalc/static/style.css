@@ -3,33 +3,49 @@ body{
 }
 
 #input{
-    display: inline-block;
-    width: 50%;
+    display: flex;
+    width: 70%;
 }
 
 #output{
-    display: inline-block;
-    width: 50%;
+    display: flex;
+    width: 30%;
     font-size: 500%;
 }
 
 #lim{
-    font-size: 1000%;
+    font-size: 800%;
+    text-align: center;
 }
 
 #xToLabel{
-    font-size: 500%;
-}
-
-#function{
-    font-size: 200%;
+    font-size: 300%;
+    width: 50%;
 }
 
 #xTo{
-    font-size: 150%;
-    width: 15%;
+    font-size: 300%;
+    width: 50%;
+}
+
+#function{
+    font-size: 300%;
+    width: 85%
 }
 
 #calcButton{
-    font-size: 200%;
+    font-size: 300%;
+    width: 80px;
+}
+
+#limBlock{
+    width: 20%;
+}
+
+#fuctionBlock{
+    width: 75%;
+}
+
+.ib{
+    display: inline-block;
 }
