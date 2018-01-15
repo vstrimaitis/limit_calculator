@@ -41,6 +41,7 @@ body{
     width: 30px;
     background-color: rgb(248, 130, 33);
     border: 0px solid rgb(248, 130, 33);
+    text-align: center;
 }
 
 #calcButton:hover{
@@ -61,6 +62,7 @@ body{
     width: 20%;
     font-size: 150%;
     height: 100%;
+    padding-top: 3%;
 }
 
 .if{
@@ -76,11 +78,16 @@ body{
     padding: 5px;
     border: 0px solid rgba(37, 37, 37, 0.603);
     border-radius: 10px;
+    padding: 20px;
 }
 
 #error {
     position: absolute;
-    bottom: 10%;
+    bottom: 1%;
+    text-align: center;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    color: rgb(51, 4, 4);
 }
 
 .fields{
@@ -90,4 +97,39 @@ body{
 
 .fields:focus{
     outline-width: 0;
+}
+
+img{
+    height: 25%;
+    width: 25%;
+}
+
+span{
+    font-size: 300%;
+}
+
+#header{
+    display: inline-flex;
+    align-items: center;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    position: relative;
+}
+
+#span1{
+    color: red;
+}
+
+#span2{
+    color: orange;
+}
+
+#message{
+    padding-left: 5%;
+    color: gray;
+}
+
+#span3{
+    font-size: 100%;
+    color: rgb(199, 147, 58);
 }

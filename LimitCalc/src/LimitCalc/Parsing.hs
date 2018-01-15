@@ -65,6 +65,7 @@ fn = msum $ (\(n, f) -> try (name n) >> return f) <$>
     [ ("sin", Expr.Function Expr.Sin)
     , ("cos", Expr.Function Expr.Cos)
     , ("atan", Expr.Function Expr.Atan)
+    , ("arctg", Expr.Function Expr.Atan)
     , ("exp", Expr.Function Expr.Exp)
     , ("ln", Expr.Function Expr.Ln)
     , ("sqrt", Expr.squareRoot)

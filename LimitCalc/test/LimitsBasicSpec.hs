@@ -1,10 +1,12 @@
-module Limits.Basic.BasicSpec (spec) where
+module LimitsBasicSpec (spec) where
 
 import Test.Hspec
 import LimitCalc
 import LimitCalc.Point
+import LimitCalc.Sign
 import TestsCommon
 
+tests :: (MaybeSigned a, Floating a) => [Test a]
 tests =
     [ Test {tInput = "sin x", tX = Finite 0,         tOutput = HasLimit (Finite 0)}
     , Test {tInput = "sin x", tX = Finite (pi/2),    tOutput = HasLimit (Finite 1)}
@@ -41,4 +43,4 @@ tests =
     ]
 
 spec :: Spec
-spec = createTests tests
+spec = createTests (tests :: [Test Double])
