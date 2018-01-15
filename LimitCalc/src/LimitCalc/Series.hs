@@ -264,8 +264,20 @@ fe = makeFunction (\n a -> exp a / fromIntegral (fac n)) heur
             Both -> H.Info NoLimit
 
 flog :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
-flog = makeFunction (\n a -> if n == 0 then log a else 1 / (fromInteger n * a ** fromInteger n)) heur
+flog series = divergence series >>= \d -> case d of
+    Just di -> Left <$> heur di
+    Nothing -> case getSign (safeHead (sPos series)) of
+        Just Positive -> makeFunction der heur series
+        Just Negative -> breakUndefined
+        Just Zero -> breakUnknown
+        Nothing -> breakUnknown
     where
+        der n a =
+            if n == 0 then
+                log a
+            else
+                1 / (fromInteger n * a ** fromInteger n)
+
         heur d = case d of
             PositiveInf -> pure $ H.Info (HasLimit PositiveInfinity)
             NegativeInf -> breakUndefined
