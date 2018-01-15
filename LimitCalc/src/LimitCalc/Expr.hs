@@ -6,19 +6,18 @@ module LimitCalc.Expr
     , Fn(..)
     , negate
     , squareRoot
+    , power
     , substituteX
-    , fixPowers
     ) where
     
 import Prelude hiding (negate)
-import Data.Ratio ((%))
-import LimitCalc.Limits
+import Data.Ratio ((%), numerator, denominator)
 
 data Expr a
     = Const a
     | X
+    | Pi
     | BinaryOp Op (Expr a) (Expr a)
-    | Power (Expr a) a
     | IntegerPower (Expr a) Integer
     | Function Fn (Expr a)
     deriving (Show, Functor)
@@ -39,28 +38,27 @@ data Fn
     deriving Show
 
 negate :: Num a => Expr a -> Expr a
-negate = BinaryOp Multiply (Const $ -1)
+negate (Const x) = Const (-x)
+negate expr = BinaryOp Multiply (Const $ -1) expr
 
 squareRoot :: Fractional a => Expr a -> Expr a
-squareRoot e = Power e (fromRational (1 % 2))
+squareRoot e = power e $ Const $ fromRational (1 % 2)
+
+power :: Fractional a => Expr a -> Expr Rational -> Expr a
+power a b = case b of
+    Const x | denominator x == 1 ->
+        if x < 0 then
+            BinaryOp Divide (Const 1) (IntegerPower a (-numerator x))
+        else if x == 0 then
+            Const 1
+        else
+            IntegerPower a (numerator x)
+    _ -> Function Exp (BinaryOp Multiply (fmap fromRational b) (Function Ln a))
 
 substituteX :: Expr a -> Expr a -> Expr a
 substituteX with X = with
 substituteX _ e@(Const _) = e
+substituteX _ Pi = Pi
 substituteX with (BinaryOp op a b) = BinaryOp op (substituteX with a) (substituteX with b)
 substituteX with (Function fn a) = Function fn (substituteX with a)
-substituteX with (Power a n) = Power (substituteX with a) n
 substituteX with (IntegerPower a n) = IntegerPower (substituteX with a) n
-
-fixPowers :: (MaybeSigned a, Num a) => Expr a -> Expr a
-fixPowers (Const x) = Const x
-fixPowers X = X
-fixPowers (BinaryOp op a b) = BinaryOp op (fixPowers a) (fixPowers b)
-fixPowers (Function fn a) = Function fn (fixPowers a)
-fixPowers (IntegerPower x a)
-    | a == 0 = Const 1
-    | a < 0 = BinaryOp Divide (Const 1) (IntegerPower (fixPowers x) (-a))
-    | otherwise = IntegerPower x a
-fixPowers (Power x a) = case getSign a of
-    Just Negative -> BinaryOp Divide (Const 1) (Power (fixPowers x) (-a))
-    _ -> Power (fixPowers x) a

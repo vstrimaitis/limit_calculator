@@ -1,0 +1,176 @@
+\section{Teorinės dalies aprašymas}
+
+%\subsection*{Laipsnių eilutės}
+
+%\[\sum_{n=0}^{\infty} a_n(x_n)^n = a_0 + a_1 x + a_2 x^2 + ...\]
+
+%\[\sum_{m=1}^{k} b_m(x_m)^{-m} = b_1 x^{-1} + b_2 x^{-2} + ... + b_k x^{-k}\]
+
+%\[c_n x^n = a_n(x_n)^n + a_{n-1}x^{n-1} \times b_{1}{x} + a_{n+1}(x_{n+1}) \times b_{-1}x^{-1} + ...\]
+
+
+Programos kūrimo metodika pasirinkta laipsnių eilutės. 
+Tai yra Teiloro eilučių praplėtimas, kuriame leidžiame turėti baigtiniį kiekį neigiamų laipsnių. 
+Jeigu skleidžiant įvestį gaunamas begalinis kiekis neigiamų laipsnių, ši metodika nebėra tinkama taikyti norint rasti išraiškos ribą.
+Tokiu atveju, naudojame eurisitinę analizę. 
+
+\subsection{Teiloro eilutės}
+
+	Teiloro skleidiniai yra būdas norimu tikslumu aproksimuoti funkcijų reikšmes artėjant į konkretų tašką.
+	Pagrindinė apytikslės reikšmės skaičiavimo sąlyga - funkcija privalo būti diferencijuojama pasirinkto taško aplinkoje.
+	Funkcija keičiama polinomu pasinaudojant Teiloro skleidiniu.
+	Kadangi skleidinio forma yra begalinė, tikslumą galima laisvai pasirinkti, imant baigtinį kiekį polinomo narių. 
+	Skaičiuojant ribas, bandoma skaičiuti suskaičiuoti pirmujų skleidinio narių reikšmes ir įvertinti likusių narių elgesį. 
+
+	\subsubsection*{Begalinis skleidinys}
+		Kadangi Teiloro skleidinys bendru atveju turi be galo daug polinominių narių, jis yra begalo tiklsus tikrosios funkcijos keitinys.
+
+		\[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + \frac{f'''(a)}{3!}(x-a)^3 + ...\]
+		
+		Alternatyvi begalinės polinominės sumos formulė:
+
+		\[\lim_{x \to a} f(x) = \sum_{n=0}^{\infty} \frac{f^{(n)}(a)}{n!}(x-a)^n\]
+
+	\subsubsection*{Baigtinis skleidinys}
+
+		Praktiškai neįmanoma suskaičiuoti tokios funkcijos tikslią reikšmę, todėl yra imamas baigtinis kiekis primujų skleidinio narių,
+		o paklaida kompensuojama liekamojo nario $r_n(x)$ įvedimu.
+
+		\[\lim_{x \to a} f(x) = f(a) + \frac{f'(a)}{1!}(x-a)+\frac{f''(a)}{2!}(x-a)^2 + ... + \frac{f^{(n)}(a)}{n!}(x-a)^n + r_n(x) \]
+
+		Alternatyvi baigtinės polinominės sumos formulė:
+		
+		\[\lim_{x \to a} f(x) = \sum_{k=0}^{n} \frac{f^{(k)}(a)}{k!}(x-a)^k + r_n(x)\]
+
+		Tegu funkcija $f$ yra $n+1$ kartą diferencijuojama.
+		Tada paklaida lygi:
+
+		\[r_n(x) = \frac{f^{(n+1)}(c)}{(n+1)!}(x-a)^{n+1} \textrm{ , kur c } \in (a,x) \textrm{ arba c } \in (x,a).\]
+
+		Jei $f^{(n)}$ tolydi, tai:
+
+		\[ r_n(x) = o((x-a)^n) \textrm{ , kai } x \to a.\]
+
+	\subsubsection*{Elementarių funkcijų ribos}
+
+		Elementarių funcijų skleidiniai taškuose $a$ ir $a=0$: 
+
+		$\bm{e^x}$ \textbf{riba}
+
+		\[\lim_{x \to a} e^x= e^a + \frac{e^a}{1!} (x-a) + \frac{e^a}{2!}(x-a)^2 + \frac{e^a}{3!}(x-a)^3 + ... \]
+
+		Kai $a = 0$, tai: 
+		\[\lim_{x \to 0} e^x= e^0 +  \frac{e^0}{1!} (x-0) + \frac{e^0}{2!} (x-0)^2 + \frac{e^0}{3!} (x-0)^3 + ... = 1 + x + \frac{x^2}{2} + \frac{x^3}{6} + ... \]
+
+		$\bm{sin(x)}$ \textbf{riba}
+
+		\[ \lim_{x \to a} sin(x) = sin(a) + \frac{cos(a)}{1!}(x-a)+\frac{-sin(a)}{2!}(x-a)^2+\frac{-cos(a)}{3!}(x-a)^3+\frac{sin(a)}{4!}(x-a)^4+...\]
+
+		Kai $a = 0$, tai:
+		\[ \lim_{x \to 0} sin(x) = sin(0) + \frac{cos(0)}{1!}(x-0)+\frac{-sin(0)}{2!}(x-0)^2+\frac{-cos(0)}{3!}(x-0)^3+\frac{sin(0)}{4!}(x-0)^4 + ... = \] 
+
+		\[ = 0 + x + 0 + \frac{-1}{3!}x^3 + 0 + \frac{1}{5!}x^5 + ... = x - \frac{x^3}{6}+\frac{x^5}{120} - ... \]
+
+		$\bm{cos(x)}$ \textbf{riba}
+
+		\[ \lim_{x \to a} cos(x) = cos(a) + \frac{-sin(a)}{1!}(x-a)+\frac{-cos(a)}{2!}(x-a)^2+\frac{sin(a)}{3!}(x-a)^3+\frac{cos(a)}{4!}(x-a)^4+...\]
+
+		Kai $a = 0$, tai:
+		\[ \lim_{x \to 0} cos(x) = cos(0) + \frac{-sin(0)}{1!}(x-0)+\frac{-cos(0)}{2!}(x-0)^2+\frac{sin(0)}{3!}(x-0)^3+\frac{cos(0)}{4!}(x-0)^4 + ... = \] 
+
+		\[ = 1 + 0 + \frac{-1}{2!}x^2 + 0 + \frac{1}{4!}x^4 + ... = 1 - \frac{x^2}{2}+\frac{x^4}{24} - ... \]
+
+		$\bm{(1+x)^k}$ \textbf{riba}
+
+		\[\lim_{x \to a} (1+x)^k =\]
+		\[=(1+x)^k + \frac{k(1+a)^{k-1}}{1!} (x-a) + \frac{k(k-1)(1+a)^{k-2}}{2!}(x-a)^2 + \frac{{k(k-1)(k-2)(1+a)^{k-3}}}{3!}(x-a)^3 + ... \]
+
+		Kai $a = 0$, tai: 
+
+		\[\lim_{x \to 0} (1+x)^k =\]
+		\[=(1)^k + \frac{k(1)^{k-1}}{1!} (x-0) + \frac{k(k-1)(1)^{k-2}}{2!}(x-0)^2 + \frac{{k(k-1)(k-2)(1)^{k-3}}}{3!}(x-0)^3 + ...  = \]
+		\[=1 + kx + \frac{k(k-1)}{2}x^2 + \frac{{k(k-1)(k-2)}}{6}x^3 + ...  = \]
+
+		$\bm{ln(1+x)}$ \textbf{riba}
+
+		\[ \lim_{x \to a} ln(1+x) = ln(1+a) + \frac{\frac{1}{1+a}}{1!}(x-a) + \frac{-\frac{1}{(1+a)^2}}{2!}(x-a)^2 + \frac{\frac{2}{(1+a)^3}}{3!}(x-a)^3 + ... \]
+
+		Kai $a = 0$, tai:
+
+		\[ \lim_{x \to 0} ln(1+x) = ln(1+0) + \frac{\frac{1}{1+0}}{1!}(x-0) + \frac{-\frac{1}{(1+0)^2}}{2!}(x-0)^2 + \frac{\frac{2}{(1+0)^3}}{3!}(x-0)^3 + ... = \]
+
+		\[ = 0 + x + \frac{-1}{2}x^2 + \frac{1}{3}x^3 + ... = x - \frac{x^2}{2} + \frac{x^3}{3} - ...\]
+
+		$\bm{\arctan(x)}$ \textbf{riba}
+
+		\[\lim_{x \to a} \arctan(x) = \arctan(a) + \frac{\frac{1}{a^2+1}}{1!}(x-a) + \frac{\frac{-2a}{(a^2+1)^2}}{2!}(x-a)^2 + \frac{\frac{6a^2-2}{(a^2+1)^3}}{3!}(x-a)^3 \]
+
+		Kai $a = 0$, tai: 
+
+		\[\lim_{x \to 0} \arctan(x) = \arctan(0) + \frac{\frac{1}{0^2+1}}{1!}(x-0) + \frac{\frac{-2*0}{(0^2+1)^2}}{2!}(x-0)^2 + \frac{\frac{6*0^2-2}{(0^2+1)^3}}{3!}(x-0)^3 =\]
+		\[= 0 + x + 0 + \frac{1}{3} x^3 +... = x - \frac{x^3}{3} + \frac{x^5}{5} - ... \]
+
+	
+\subsection{Laipsnių eilutės}
+	
+	Laipsnių eilutės užrašome taip:
+	
+	\[\sum_{n=0}^{\infty} a_nx^n + \sum_{m=-1}^{-k} a_mx^m = \sum_{i=-k}^{\infty} a_ix^i  = a_{-k} x^{-k} + ... + a_{-1} x^{-1} + a_0 + a_1 x + ... \]
+	
+	Tokiame užraše matome, jog teigiamų laipsnių galime turėti be galo daug, o neigiamų laipsnių kiekis būtinai turi būti baigtinis.
+	
+	Šioms eilutėms galima taikyti aritmetines operacijas:
+	
+	\begin{itemize}
+		\item Sudėties operacija atliekame sudėdami atitinkamus eilučių koeficientus ir gauname tokios pačios formos eilutę.
+		\item Atimties operacija veikia atitinkamai sudėčiai, tai yra, koeficientai atimami.
+		\item Daugybos operacija atliekama taip - kiekvieną pirmos eilutės narį dauginame su antros eilutės nariu.
+			  Gautą išraišką sutraukiame ir kiekvienam konkrečiam $n$ yra baigtinis skaičius narių turinčių $x^n$.
+			  Taip yra, nes $x^n$ išraišką gauname sudauginę $x^i$ ir $x^j$, kur $i \leq \frac{n}{2}$ ir $j \geq \frac{n}{2}$ ir atvirkščiai.
+			  Kiekvieną koeficientas yra konkretus skaičius, nes yra sutrauktas iš baigtinio kiekio narių.
+		\item Dalybos operacija atliekama pasiremiant polinomų dalybos stulpeliu algoritmą. 
+			  Šis algoritmas veikia taip pat kai turime ir baigtinius, ir begalinius dalinio ir daliklio argumentus.
+	\end{itemize}
+	
+	Turint aukščiau įvardintas operacijas galima bet kokią iš jų sudarytą išraišką pasiversti laipsnių eilute.
+	Dabar galima apibrėžti elgseną su funkcijomis.
+	
+	Sakykime turime išraišką $f(S)$ kur S yra laipsnių eilutė. 
+	Imame šios funkcijos Teiloro skleidinį kažkokiame taške $a$: 
+	
+	\[f(x) = f(a) + \frac{f'(a)}{1!}(x)+\frac{f''(a)}{2!}(x)^2 + +\frac{f'''(a)}{3!}(x)^3 + ...\]
+	
+	Jeigu $S$ turi bent vieną neigiamą $x$ laipsnį, tai keldami S visais natūraliaisiais laipsniais, galutinėje išraiškoje gausime begalo daug skirtingų neigiamų x laipsnių.
+	Tokia išraiška negali būti aprašyta mūsų apibrėžtomis laipsnių eilutėmis, nes neigiamų laipsnių privalo būti baigtinis kiekis. 
+	Todėl šioms situacijoms spręsti mes pasitelksime euristika.
+	Jeigu $S$ neturi nė vieno neigiamo $x$ laipsnio, galime imti $a = a_0$ ($S$ koeficientas prie $x^0$) .
+	Pasižymime:
+	
+	$P = \frac{S - a_0}{x}$
+	
+	Tada turime: 
+	
+	$S - a_0 = P \cdotp x$
+	
+	Perrašome skleidinį:
+	
+	\[f(a) + \frac{f'(a)}{1!}(Px)+\frac{f''(a)}{2!}(Px)^2 + +\frac{f'''(a)}{3!}(Px)^3 + ...\]
+	
+	Galutinei laipsnių eilutei, į kurią susiprastina šis reiškinys, norime surasti koeficientą prie $x^n$. 
+	Šiame reiškinyje matome, kad šis koeficientas priklauso tik nuo pirmųjų $n+1$ sumos narių. 
+	Todėl norėdami rasti šį koeficientą, mes paimame tuos $n+1$ narių, juos suprastiname (naudodamiesi aukščiau parodytomis aritmetinėmis operacijomis) 
+	ir iš gautos eilutės paimame koeficientą prie $x^n$. 
+	Iš to seka, jog šis reiškinys susiprastina į laipsnių eilutę - galime rasti bet kurį tos eilutės koeficientą.
+	
+	Savo programoje galime pridėti naujų funkcijų, tereikia pateikti, kaip skaičiuojami tų funkcijų Teiloro skleidinio koeficientai. 
+	Tai yra, turime pateikti funkciją: 
+	
+	\[ g(a,n) = \frac{f^{(n)}(a)}{n!}\]
+    
+    Operacijos $f(x)^{g(x)}$ bendru atveju išskleisti negalime. Šiai operacijai atlikti mes ją perrašome į $exp(g(x) \cdotp ln(f(x)))$,
+    o šių funkcijų skaičiavimas jau buvo pateiktas aukščiau.
+\subsection{Euristikos}
+	
+	%Toliau euristikos bus
+	
+	
