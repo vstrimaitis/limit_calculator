@@ -7,6 +7,12 @@
 	</head>
 	<body>
 		<div id="centerBlock">
+			<div id="header">
+
+			</div>
+			<div id="message">
+
+			</div>
 			<div id="content" class="if">
 				<div id="input">
 					<form onsubmit="calculate(); return false;">
@@ -18,18 +24,18 @@
 								<label id="xToLabel">
 									x→
 								</label>
-								<input id="xTo" type="text" name="xGoesTo" required>
+								<input id="xTo" class="fields" type="text" name="xGoesTo" required>
 							</div>
 						</div><div id="fuctionBlock" class="if">
-							<input id="function" type="text" name="function" required>
-							<input id="calcButton" type="submit" name="findLimit" value="="> 
+							<input id="function" class="fields" type="text" name="function" required>
+							<input id="calcButton" class="fields" type="submit" name="findLimit" value="="> 
 						</div>
 					</form>
+				</div><div id="output">
 				</div>
-				<div id="output"/>
 			</div>
+		</div><div id="error">
 		</div>
-		<div id="error">sadasd</div>
 		<script src="script.js"></script>
 	</body>
 </html>

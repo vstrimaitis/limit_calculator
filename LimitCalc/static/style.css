@@ -31,12 +31,20 @@ body{
 
 #function{
     font-size: 150%;
-    width: 85%
+    width: 85%;
+    margin-right: 2px;
+
 }
 
 #calcButton{
     font-size: 150%;
-    width: 80px;
+    width: 30px;
+    background-color: rgb(248, 130, 33);
+    border: 0px solid rgb(248, 130, 33);
+}
+
+#calcButton:hover{
+    background-color: rgb(206, 22, 8);
 }
 
 #limBlock{
@@ -64,9 +72,22 @@ body{
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.603);
+    padding: 5px;
+    border: 0px solid rgba(37, 37, 37, 0.603);
+    border-radius: 10px;
 }
 
 #error {
     position: absolute;
     bottom: 10%;
+}
+
+.fields{
+    border: 2px solid orange;
+    border-radius: 10px;
+}
+
+.fields:focus{
+    outline-width: 0;
 }
