@@ -1,4 +1,4 @@
-module LimitCalc.Folding (limitAtZero) where
+module LimitCalc.Folding (limitAtZero, limitAtZero') where
 
 import LimitCalc.Expr
 import qualified LimitCalc.Heuristics as H
@@ -8,7 +8,7 @@ import LimitCalc.Limits
 import LimitCalc.Point
 import LimitCalc.Sign
 import LimitCalc.Calc
-import Control.Monad ((>=>))
+import Control.Monad ((>=>), liftM2)
 
 toLimit :: (MaybeSigned a, Num a) => Result a -> Calc (Limit a)
 toLimit (Left x) = pure $ H.infoToLim x
@@ -67,7 +67,37 @@ lyft f a b = do
     b' <- b
     f a' b'
 
+isGoodLnArg :: (MaybeSigned a, Floating a) => Result a -> Calc Bool
+isGoodLnArg result = do
+    lim <- either (pure . H.infoToLim) S.seriesToLim result
+    pure $ case lim of
+        NoLimit -> False
+        Unknown -> False
+        HasLimit PositiveInfinity -> True
+        HasLimit NegativeInfinity -> False
+        HasLimit (Finite x) -> case getSign x of
+            Just Positive -> True
+            _ -> False
+
 foldExpr :: (MaybeSigned a, Floating a) => Expr a -> Calc (Result a)
+foldExpr (BinaryOp Add (Function Ln a) (Function Ln b)) = do
+    a' <- foldExpr a
+    b' <- foldExpr b
+    aGood <- isGoodLnArg a'
+    bGood <- isGoodLnArg b'
+    if aGood && bGood then
+        mul a' b' >>= flog
+    else
+        lyft add (flog a') (flog b')
+foldExpr (BinaryOp Subtract (Function Ln a) (Function Ln b)) = do
+    a' <- foldExpr a
+    b' <- foldExpr b
+    aGood <- isGoodLnArg a'
+    bGood <- isGoodLnArg b'
+    if aGood && bGood then
+        divide a' b' >>= flog
+    else
+        lyft sub (flog a') (flog b')        
 foldExpr (Const value) = pure $ Right $ S.fromNum value
 foldExpr X = pure $ Right S.justX
 foldExpr Pi = pure $ Right $ S.fromNum pi
@@ -82,6 +112,77 @@ foldExpr (Function Atan a) = fatan =<< foldExpr a
 foldExpr (Function Exp a) = fe =<< foldExpr a
 foldExpr (Function Ln a) = flog =<< foldExpr a
 
+deepSimplify :: (MaybeSigned a, Num a) => Expr a -> Calc (Expr a)
+deepSimplify expr = go expr >>= simplify
+    where
+        go :: (MaybeSigned a, Num a) => Expr a -> Calc (Expr a)
+        go e@(Const _) = pure $ e
+        go X = pure $ X
+        go Pi = pure $ Pi
+        go (BinaryOp Add a b) = liftM2 (BinaryOp Add) (deepSimplify a) (deepSimplify b)
+        go (BinaryOp Subtract a b) = liftM2 (BinaryOp Subtract) (deepSimplify a) (deepSimplify b)
+        go (BinaryOp Multiply a b) = liftM2 (BinaryOp Multiply) (deepSimplify a) (deepSimplify b)
+        go (BinaryOp Divide a b) = liftM2 (BinaryOp Divide) (deepSimplify a) (deepSimplify b)
+        go (IntegerPower a n) = flip IntegerPower n <$> deepSimplify a
+        go (Function Sin a) = Function Sin <$> deepSimplify a
+        go (Function Cos a) = Function Cos <$> deepSimplify a
+        go (Function Atan a) = Function Atan <$> deepSimplify a
+        go (Function Exp a) = Function Exp <$> deepSimplify a
+        go (Function Ln a) = Function Ln <$> deepSimplify a
+
+simplify :: (MaybeSigned a, Num a) => Expr a -> Calc (Expr a)
+simplify e@(BinaryOp Multiply (Const _) (Const _)) =
+    pure e
+simplify (BinaryOp Multiply x y@(Const _)) = do
+    consumeFuel
+    simplify (BinaryOp Multiply y x)
+simplify (BinaryOp Divide (BinaryOp Add a b) c) = do
+    consumeFuel
+    e1 <- deepSimplify (BinaryOp Divide a c)
+    e2 <- deepSimplify (BinaryOp Divide b c)
+    simplify (BinaryOp Add e1 e2)
+simplify (BinaryOp Divide (BinaryOp Subtract a b) c) = do
+    consumeFuel
+    e1 <- deepSimplify (BinaryOp Divide a c)
+    e2 <- deepSimplify (BinaryOp Divide b c)
+    simplify (BinaryOp Subtract e1 e2)
+simplify (BinaryOp Divide (Function Exp a) (Function Exp b)) = do
+    consumeFuel
+    e <- deepSimplify (BinaryOp Subtract a b)
+    simplify (Function Exp e)
+simplify (BinaryOp Multiply (Function Exp a) (Function Exp b)) = do
+    consumeFuel
+    e <- deepSimplify (BinaryOp Add a b)
+    simplify (Function Exp e)
+simplify (BinaryOp Divide (Function Exp a) b) = do
+    e <- deepSimplify (BinaryOp Divide b (Function Exp a))
+    consumeFuel
+    simplify (BinaryOp Divide (Const 1) e)
+simplify expr@(BinaryOp Add (BinaryOp Multiply (Const x) a) (BinaryOp Multiply (Const y) b)) = do
+    consumeFuel
+    case getSign (x - y) of
+        Just Zero -> simplify (BinaryOp Multiply (Const x) (BinaryOp Add a b))
+        Just _ -> simplify
+            (BinaryOp Add
+                (BinaryOp Multiply (Const x) (BinaryOp Add a b))
+                (BinaryOp Multiply (BinaryOp Subtract (Const x) (Const y)) b))
+        Nothing -> pure expr
+simplify expr@(BinaryOp Subtract (BinaryOp Multiply (Const x) a) (BinaryOp Multiply (Const y) b)) = do
+    consumeFuel
+    case getSign (x - y) of
+        Just Zero -> simplify (BinaryOp Multiply (Const x) (BinaryOp Subtract a b))
+        Just _ -> simplify
+            (BinaryOp Subtract
+                (BinaryOp Multiply (Const x) (BinaryOp Subtract a b))
+                (BinaryOp Multiply (BinaryOp Subtract (Const x) (Const y)) b))
+        Nothing -> pure expr
+simplify e = pure e
+
+simp :: (MaybeSigned a, Num a) => Expr a -> CalcResult (Expr a)
+simp = runWithInfinite . simplify
 
 limitAtZero :: (MaybeSigned a, Floating a) => Expr a -> Calc (Limit a)
-limitAtZero = foldExpr >=> toLimit
+limitAtZero = deepSimplify >=> foldExpr >=> toLimit
+
+limitAtZero' :: (MaybeSigned a, Floating a) => Expr a -> Calc (S.Series a)
+limitAtZero' = deepSimplify >=> foldExpr >=> (pure . either (error "got left") id)

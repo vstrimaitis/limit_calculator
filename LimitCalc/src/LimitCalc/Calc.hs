@@ -7,6 +7,7 @@ module LimitCalc.Calc
     , breakUndefined
     , breakUnknown
     , consumeFuel
+    , runWithInfinite
     ) where
 
 import Control.Monad (ap)
@@ -14,6 +15,13 @@ import Control.Monad (ap)
 data CalcResult a = Ok a | Undefined | MissingInfo deriving (Show, Functor)
 
 data Calc a = Calc { runCalc :: Integer -> CalcResult (Either (Calc a) (Integer, a)) }
+
+runWithInfinite :: Calc a -> CalcResult a
+runWithInfinite fueled = case runCalc fueled 1 of
+    Ok (Left fueled') -> runWithInfinite fueled'
+    Ok (Right (_, value)) -> Ok value
+    Undefined -> Undefined
+    MissingInfo -> MissingInfo
 
 instance Show (Calc a) where
     show _ = "<calc>"

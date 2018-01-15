@@ -4,7 +4,6 @@ module LimitCalc
     ( Result(Unknown, Undefined, OutOfFuel, NoLimit, HasLimit)
     , findLimit
     , findLimitWithFuel
-    , check
     ) where
 
 import LimitCalc.Expr
@@ -26,12 +25,6 @@ data Result a
 
 defaultFuelAmount :: Integer
 defaultFuelAmount = 100
-
-check :: String -> String -> String
-check at expr = either show show $ do
-    e :: Expr Double <- parseExpr expr
-    a <- parsePoint at
-    return $ findLimit a e
 
 findLimitWithFuel :: (MaybeSigned a, Floating a) => Integer -> Point a -> Expr a -> Result a
 findLimitWithFuel fuel point expr = case runCalc (findLimit' point expr) fuel of

@@ -3,8 +3,10 @@ module LimitsFancySpec where
 import Test.Hspec
 import LimitCalc
 import LimitCalc.Point
+import LimitCalc.Sign
 import TestsCommon
 
+tests :: (MaybeSigned a, Floating a) => [Test a]
 tests =
     [ Test {tInput = "1 / (1 + x)", tX = Finite (-1),    tOutput = NoLimit}
     , Test {tInput = "exp (x * ln 2) / x ^ 2", tX = Finite 2, tOutput = HasLimit (Finite 1)}
@@ -54,7 +56,12 @@ tests =
     , Test {tInput = "(1 + 1 / x)^(x)", tX = PositiveInfinity , tOutput = HasLimit (Finite (exp 1))}
     , Test {tInput = "x *  (1 / x)", tX = Finite 0 , tOutput = HasLimit (Finite 1)}
     , Test {tInput = "x *  (1 / x)", tX = PositiveInfinity, tOutput = HasLimit (Finite 1)}
+
+    , Test {tInput = "x / sqrt x", tX = PositiveInfinity, tOutput = HasLimit PositiveInfinity}
+    , Test {tInput = "sqrt x / sqrt (x + 1)", tX = PositiveInfinity, tOutput = HasLimit (Finite 1)}
+    , Test {tInput = "sqrt x / (sqrt (x + 1) + sqrt (x + 3))", tX = PositiveInfinity, tOutput = HasLimit (Finite 0.5)}
+    , Test {tInput = "(sqrt x + sqrt (x + 1)) / (sqrt (x + 1) + sqrt (x - 1))", tX = PositiveInfinity, tOutput = HasLimit (Finite 1)}
     ]
 
 spec :: Spec
-spec = createTests tests
+spec = createTests (tests :: [Test Double])

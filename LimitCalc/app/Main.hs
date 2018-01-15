@@ -14,6 +14,7 @@ import Prelude hiding (error, function)
 import qualified LimitCalc.Parsing as P
 import LimitCalc
 import LimitCalc.Point
+import LimitCalc.Expr (Expr)
 
 main :: IO ()
 main = do
@@ -87,7 +88,7 @@ handlePrecise expr pt = do
         }
 
 handleInprecise exprStr ptStr = do
-    let exprParseResult = P.parseExpr exprStr
+    let exprParseResult :: Either P.ParseError (Expr Double) = P.parseExpr exprStr
     let ptParseResult = P.parsePoint ptStr
     case (exprParseResult, ptParseResult) of
         (Left err, _) -> json emptyResponse {result = FunctionParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}

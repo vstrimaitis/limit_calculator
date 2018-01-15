@@ -8,6 +8,7 @@ import LimitCalc
 import LimitCalc.Point
 import LimitCalc.Expr
 import LimitCalc.Parsing
+import LimitCalc.Sign
 import Control.Monad
 
 data Test a = Test {
@@ -16,6 +17,7 @@ data Test a = Test {
     tOutput :: Result a
 }
 
+createTests :: (Show a, MaybeSigned a, Floating a) => [Test a] -> Spec
 createTests [] = return ()
 createTests (t:ts) = do
     it (createTestDescription t) $ do
@@ -28,7 +30,7 @@ createTests (t:ts) = do
                 checkAnswer lim (tOutput t)
     createTests ts
 
-checkAnswer :: (Ord a, Floating a, Show a) => Result a -> Result a -> Expectation
+checkAnswer :: (MaybeSigned a, Floating a, Show a) => Result a -> Result a -> Expectation
 checkAnswer lim (HasLimit (Finite expected)) = lim `shouldSatisfy` almost expected
 checkAnswer lim (HasLimit PositiveInfinity) = lim `shouldSatisfy` pinf
 checkAnswer lim (HasLimit NegativeInfinity) = lim `shouldSatisfy` ninf
@@ -41,11 +43,8 @@ createTestDescription t = tInput t ++ showLim (tOutput t) ++ " as x -> " ++ show
         showLim Unknown       = error "batai"
         showLim (HasLimit pt) = " -> " ++ show pt
 
-eps :: (Ord a, Floating a) => a
-eps = 1e-8
-
-almost :: (Ord a, Floating a) => a -> Result a -> Bool
-almost expected (HasLimit (Finite actual)) = abs(actual - expected) < eps
+almost :: (MaybeSigned a, Floating a) => a -> Result a -> Bool
+almost expected (HasLimit (Finite actual)) = isZero (actual - expected) == Just True
 almost _ _ = False
 
 pinf (HasLimit PositiveInfinity) = True
