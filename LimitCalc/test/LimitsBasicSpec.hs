@@ -1,4 +1,4 @@
-module Limits.Basic.BasicSpec (spec) where
+module LimitsBasicSpec (spec) where
 
 import Test.Hspec
 import LimitCalc

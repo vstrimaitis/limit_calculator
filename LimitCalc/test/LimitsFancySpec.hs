@@ -1,4 +1,4 @@
-module Limits.FancySpec where
+module LimitsFancySpec where
 
 import Test.Hspec
 import LimitCalc
