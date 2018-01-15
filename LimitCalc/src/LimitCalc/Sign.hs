@@ -1,6 +1,12 @@
 {-# LANGUAGE FlexibleInstances, UndecidableInstances #-}
 
-module LimitCalc.Sign where
+module LimitCalc.Sign
+    ( Sign(Negative, Zero, Positive)
+    , MaybeSigned
+    , getSign
+    , isZero
+    , isNonZero
+    ) where
 
 data Sign = Negative | Zero | Positive deriving Show
 
@@ -19,8 +25,11 @@ class MaybeSigned a where
         Just Zero -> Just False
         Nothing -> Nothing
 
-instance (Num a, Ord a) => MaybeSigned a where
+eps :: Double
+eps = 1e-12
+
+instance MaybeSigned Double where
     getSign x
-        | x < 0 = Just Negative
-        | x > 0 = Just Positive
+        | x < -eps = Just Negative
+        | x > eps = Just Positive
         | otherwise = Just Zero
