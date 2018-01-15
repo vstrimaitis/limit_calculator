@@ -8,7 +8,7 @@
 	<body>
 		<div id="content" class="if">
 		<div id="input">
-			<form onsubmit="return false;">
+			<form onsubmit="calculate()">
 				<div id="limBlock" class="if">
 					<label id="lim">
 						lim 
@@ -21,12 +21,10 @@
 					</div>
 				</div><div id="fuctionBlock" class="if">
 					<input id="function" type="text" name="function" required>
-					<input id="calcButton" type="submit" name="findLimit" value="=" onsubmit="calculate()"> 
+					<input id="calcButton" type="submit" name="findLimit" value="=" "> 
 				</div>
 			</form>
-			</div><div id="output">
-				ats
-			</div>
+			</div><div id="output"/>
 		</div>
 		<div id="error"/>
 		<script src="script.js"></script>
