@@ -12,8 +12,8 @@ import Data.Aeson (ToJSON, FromJSON, genericToJSON, genericParseJSON, defaultOpt
 import Prelude hiding (error, function)
 
 import qualified LimitCalc.Parsing as P
-import qualified LimitCalc as LC
-import LimitCalc.Limits
+import qualified LimitCalc
+import LimitCalc.Point
 
 main :: IO ()
 main = do
@@ -39,7 +39,15 @@ instance FromJSON LimitRequest where
         { omitNothingFields = True }
 
 
-data Result = OK | FunctionParseError | PointParseError | UnknownLimit | OutOfFuel | UnsupportedOperation deriving (Generic)
+data Result
+    = OK
+    | FunctionParseError
+    | PointParseError
+    | UnknownLimit
+    | OutOfFuel
+    | UnsupportedOperation
+    | FunctionUndefined
+    deriving (Generic)
 instance ToJSON Result
 instance FromJSON Result
 
@@ -73,7 +81,10 @@ server = do
             _         -> handleInprecise expr pt
 
 handlePrecise expr pt = do
-    json $ emptyResponse {result = UnsupportedOperation, errorMessage = Just "Precise calculations are not supported yet"}
+    json $ emptyResponse
+        { result = UnsupportedOperation
+        , errorMessage = Just "Precise calculations are not supported yet"
+        }
 
 handleInprecise exprStr ptStr = do
     let exprParseResult = P.parseExpr exprStr
@@ -82,13 +93,14 @@ handleInprecise exprStr ptStr = do
         (Left err, _) -> json emptyResponse {result = FunctionParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (_, Left err) -> json emptyResponse {result = PointParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (Right expr, Right pt) -> do
-            let lim = LC.findLimit pt expr
+            let lim = findLimit pt expr
             json $ buildLimitResponse lim
 
 
-buildLimitResponse LC.Unknown = emptyResponse {result = UnknownLimit}
-buildLimitResponse LC.NoLimit = emptyResponse {hasLimit = Just False}
-buildLimitResponse LC.OutOfFuel = emptyResponse {result = Main.OutOfFuel}
-buildLimitResponse (LC.HasLimit PositiveInfinity) = emptyResponse {hasLimit = Just True, limit = Just "+inf"}
-buildLimitResponse (LC.HasLimit NegativeInfinity) = emptyResponse {hasLimit = Just True, limit = Just "-inf"}
-buildLimitResponse (LC.HasLimit (Finite lim)) = emptyResponse {hasLimit = Just True, limit = Just (show lim)}
+buildLimitResponse Undefined = emptyResponse {result = FunctionUndefined}
+buildLimitResponse Unknown = emptyResponse {result = UnknownLimit}
+buildLimitResponse NoLimit = emptyResponse {hasLimit = Just False}
+buildLimitResponse OutOfFuel = emptyResponse {result = Main.OutOfFuel}
+buildLimitResponse (HasLimit PositiveInfinity) = emptyResponse {hasLimit = Just True, limit = Just "+inf"}
+buildLimitResponse (HasLimit NegativeInfinity) = emptyResponse {hasLimit = Just True, limit = Just "-inf"}
+buildLimitResponse (HasLimit (Finite lim)) = emptyResponse {hasLimit = Just True, limit = Just (show lim)}

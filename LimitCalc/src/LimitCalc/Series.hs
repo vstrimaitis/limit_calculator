@@ -24,6 +24,8 @@ module LimitCalc.Series
 import LimitCalc.Derivative
 import qualified LimitCalc.Heuristics as H
 import LimitCalc.Limits
+import LimitCalc.Point
+import LimitCalc.Sign
 import LimitCalc.Calc
 
 data Series a = Series {

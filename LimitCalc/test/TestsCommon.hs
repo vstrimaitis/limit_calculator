@@ -5,7 +5,7 @@ module TestsCommon
 
 import Test.Hspec
 import LimitCalc
-import LimitCalc.Limits
+import LimitCalc.Point
 import LimitCalc.Expr
 import LimitCalc.Parsing
 import Control.Monad
@@ -13,7 +13,7 @@ import Control.Monad
 data Test a = Test {
     tInput  :: String,
     tX      :: Point a,
-    tOutput :: Limit a
+    tOutput :: Result a
 }
 
 createTests [] = return ()
@@ -28,11 +28,12 @@ createTests (t:ts) = do
                 checkAnswer lim (tOutput t)
     createTests ts
 
-checkAnswer :: (Ord a, Floating a, Show a) => Limit a -> Limit a -> Expectation
+checkAnswer :: (Ord a, Floating a, Show a) => Result a -> Result a -> Expectation
 checkAnswer lim (HasLimit (Finite expected)) = lim `shouldSatisfy` almost expected
 checkAnswer lim (HasLimit PositiveInfinity) = lim `shouldSatisfy` pinf
 checkAnswer lim (HasLimit NegativeInfinity) = lim `shouldSatisfy` ninf
 checkAnswer lim NoLimit = lim `shouldSatisfy` nolim
+checkAnswer lim Undefined = lim `shouldSatisfy` notDefined
 
 createTestDescription t = tInput t ++ showLim (tOutput t) ++ " as x -> " ++ show (tX t)
     where
@@ -43,7 +44,7 @@ createTestDescription t = tInput t ++ showLim (tOutput t) ++ " as x -> " ++ show
 eps :: (Ord a, Floating a) => a
 eps = 1e-8
 
-almost :: (Ord a, Floating a) => a -> Limit a -> Bool
+almost :: (Ord a, Floating a) => a -> Result a -> Bool
 almost expected (HasLimit (Finite actual)) = abs(actual - expected) < eps
 almost _ _ = False
 
@@ -55,3 +56,6 @@ ninf _ = False
 
 nolim NoLimit = True
 nolim _ = False
+
+notDefined Undefined = True
+notDefined _ = False

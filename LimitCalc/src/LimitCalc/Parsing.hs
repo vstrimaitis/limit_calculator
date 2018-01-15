@@ -7,7 +7,7 @@ module LimitCalc.Parsing
 import Prelude hiding (subtract)
 import LimitCalc.Expr (Expr)
 import qualified LimitCalc.Expr as Expr
-import qualified LimitCalc.Limits as Lim
+import LimitCalc.Point
 import Data.Foldable (msum)
 import Data.Ratio
 import Control.Arrow (left)
@@ -112,15 +112,15 @@ makeOp ch op = char ch >> spaces >> return (Expr.BinaryOp op)
 
 -- Point parsing
 
-parsePoint :: Floating a => String -> Either ParseError (Lim.Point a)
+parsePoint :: Floating a => String -> Either ParseError (Point a)
 parsePoint = left convertError . parse point ""
 
-point :: Floating a => Parser (Lim.Point a)
+point :: Floating a => Parser (Point a)
 point = spaces >> msum
-    [ char '+' >> spaces >> name "inf" >> spaces >> return Lim.PositiveInfinity
-    , name "inf" >> spaces >> return Lim.PositiveInfinity
-    , try (char '-' >> spaces >> name "inf" >> spaces >> return Lim.NegativeInfinity)
-    , Lim.Finite <$> value
+    [ char '+' >> spaces >> name "inf" >> spaces >> return PositiveInfinity
+    , name "inf" >> spaces >> return PositiveInfinity
+    , try (char '-' >> spaces >> name "inf" >> spaces >> return NegativeInfinity)
+    , Finite <$> value
     ]
 
 value :: Floating a => Parser a
