@@ -71,6 +71,8 @@ emptyResponse = LimitResp {result = OK, errorMessage = Nothing, errorLocation = 
 server :: ScottyM ()
 server = do
     get "/" $ file "./static/index.html"
+    get "/script.js" $ file "./static/script.js"
+    get "/style.css" $ file "./static/style.css"
     post "/api/limits" $ do
         (req :: LimitRequest) <- jsonData
         let expr = function req
