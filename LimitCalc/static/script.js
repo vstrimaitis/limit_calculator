@@ -18,7 +18,7 @@ function calculate(){
     let params = { //add whats missing
         method: 'POST',
         body: JSON.stringify(data),
-        headers: new Headers()
+        headers: new Headers().append("Content-Type", "applicication/json")
     }
 
     let answer;
