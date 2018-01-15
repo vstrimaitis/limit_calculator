@@ -168,14 +168,19 @@ fe = lift f
         f (HasLimit NegativeInfinity) = HasLimit (Finite 0)
         f (HasLimit (Finite x)) = HasLimit (Finite (exp x))
 
-flog :: Floating a => Info a -> Calc (Info a)
+flog :: (MaybeSigned a, Floating a) => Info a -> Calc (Info a)
 flog = liftC f
     where
+        f :: (MaybeSigned a, Floating a) => Limit a -> Calc (Limit a)
         f NoLimit = pure NoLimit
         f Unknown = pure Unknown
         f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
         f (HasLimit NegativeInfinity) = breakUndefined
-        f (HasLimit (Finite x)) = pure $ HasLimit (Finite (log x)) -- x < 0 evil
+        f (HasLimit (Finite x)) = case getSign x of
+            Just Positive -> pure $ HasLimit (Finite (log x))
+            Just Negative -> breakUndefined
+            Just Zero -> breakUnknown
+            Nothing -> breakUnknown
 
 fatan :: Floating a => Info a -> Info a
 fatan = lift f
