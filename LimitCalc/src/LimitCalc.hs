@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module LimitCalc
-    ( Result(Unknown, OutOfFuel, NoLimit, HasLimit)
+    ( Result(Unknown, Undefined, OutOfFuel, NoLimit, HasLimit)
     , findLimit
     , findLimitWithFuel
     , check
@@ -9,12 +9,20 @@ module LimitCalc
 
 import LimitCalc.Expr
 import LimitCalc.Parsing
-import LimitCalc.Limits hiding (NoLimit, Unknown, HasLimit)
+import LimitCalc.Point
+import LimitCalc.Sign
 import qualified LimitCalc.Limits as Limits
 import LimitCalc.Folding
-import LimitCalc.Calc
+import LimitCalc.Calc hiding (Undefined)
+import qualified LimitCalc.Calc as Calc
 
-data Result a = Unknown | OutOfFuel | NoLimit | HasLimit (Point a) deriving Show
+data Result a
+    = Unknown
+    | Undefined
+    | OutOfFuel
+    | NoLimit
+    | HasLimit (Point a)
+    deriving Show
 
 defaultFuelAmount :: Integer
 defaultFuelAmount = 100
@@ -27,7 +35,7 @@ check at expr = either show show $ do
 
 findLimitWithFuel :: (MaybeSigned a, Floating a) => Integer -> Point a -> Expr a -> Result a
 findLimitWithFuel fuel point expr = case runCalc (findLimit' point expr) fuel of
-    Undefined -> NoLimit
+    Calc.Undefined -> Undefined
     MissingInfo -> Unknown
     Ok (Left _) -> OutOfFuel
     Ok (Right (_, Limits.Unknown)) -> Unknown
@@ -37,7 +45,7 @@ findLimitWithFuel fuel point expr = case runCalc (findLimit' point expr) fuel of
 findLimit :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Result a
 findLimit = findLimitWithFuel defaultFuelAmount
 
-findLimit' :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Calc (Limit a)
+findLimit' :: (MaybeSigned a, Floating a) => Point a -> Expr a -> Calc (Limits.Limit a)
 findLimit' (Finite x) = limitAtZero . substituteX (BinaryOp Add (Const x) X)
 findLimit' PositiveInfinity = limitAtZero . substituteX (overXSquared 1)
 findLimit' NegativeInfinity = limitAtZero . substituteX (overXSquared (-1))

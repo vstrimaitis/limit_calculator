@@ -29,8 +29,9 @@ library:
   exposed-modules:
   - LimitCalc
   - LimitCalc.Expr
-  - LimitCalc.Limits
   - LimitCalc.Parsing
+  - LimitCalc.Point
+  - LimitCalc.Sign
   ghc-options:
   - -Wno-simplifiable-class-constraints
 

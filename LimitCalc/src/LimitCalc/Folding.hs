@@ -5,6 +5,8 @@ import qualified LimitCalc.Heuristics as H
 import qualified LimitCalc.Series as S
 import LimitCalc.Series (Result)
 import LimitCalc.Limits
+import LimitCalc.Point
+import LimitCalc.Sign
 import LimitCalc.Calc
 import Control.Monad ((>=>))
 
@@ -58,7 +60,6 @@ flog (Right a) = S.flog a
 fatan :: (MaybeSigned a, Floating a) => Result a -> Calc (Result a)
 fatan (Left a) = pure $ Left $ H.fatan a
 fatan (Right a) = S.fatan a
-
 
 lyft :: Monad m => (a -> b -> m c) -> m a -> m b -> m c
 lyft f a b = do

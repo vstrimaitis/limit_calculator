@@ -1,7 +1,8 @@
 module Limits.FancySpec where
 
 import Test.Hspec
-import LimitCalc.Limits
+import LimitCalc
+import LimitCalc.Point
 import TestsCommon
 
 tests =

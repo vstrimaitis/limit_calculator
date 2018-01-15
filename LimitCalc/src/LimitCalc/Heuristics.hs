@@ -16,6 +16,8 @@ module LimitCalc.Heuristics
     , intPower
     ) where
 
+import LimitCalc.Sign
+import LimitCalc.Point
 import LimitCalc.Limits
 import LimitCalc.Calc
 
