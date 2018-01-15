@@ -1,5 +1,5 @@
 function calculate(){
-    const goesToField = document.getElementById("xGoesTo");
+    const goesToField = document.getElementById("xTo");
     let goesTo = goesToField.value;
 
     const funcField = document.getElementById("function");
@@ -28,8 +28,6 @@ function calculate(){
     .then(response =>{ // parse the last version of response json format
         console.log(response);
         answer = "TODO";
-
-
         outputField.innerHTML = answer;
     })
     /*.catch(function(error){ // print error if there is one 

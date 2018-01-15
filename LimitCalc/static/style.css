@@ -17,7 +17,7 @@ body{
     font-size: 1000%;
 }
 
-#xGoes{
+#xToLabel{
     font-size: 500%;
 }
 
@@ -25,11 +25,11 @@ body{
     font-size: 200%;
 }
 
-#xGoesTo{
+#xTo{
     font-size: 150%;
     width: 15%;
 }
 
-#findLimit{
+#calcButton{
     font-size: 200%;
 }
