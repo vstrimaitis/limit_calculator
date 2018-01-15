@@ -8,15 +8,15 @@ function calculate(){
     const outputField = document.getElementById("output");
     let output;
 
-    const url = "http://www.riboja.me/"; 
+    const url = "http://www.riboja.me/api/limits"; 
 
     let data = {
-        function: goesTo,
-        point: func
+        function: func,
+        point: goesTo
     }
 
     let params = { //add whats missing
-        method: 'GET',
+        method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers()
     }
@@ -24,21 +24,21 @@ function calculate(){
     let answer;
 
     fetch(url, params)
-    .then((resp) => resp.json())
-    .then(function(response){ // parse the last version of response json format
-        //console.log(response);
+    .then(resp => resp.json())
+    .then(response =>{ // parse the last version of response json format
+        console.log(response);
         answer = "TODO";
 
 
         outputField.innerHTML = answer;
     })
-    .catch(function(error){ // print error if there is one 
+    /*.catch(function(error){ // print error if there is one 
         //console.log(error);
         answer = "TODO";
 
 
         outputField.innerHTML = answer;
         // make input func error letter color red
-    })
+    })*/
 
 }

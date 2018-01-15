@@ -7,12 +7,12 @@
 	</head>
 	</body>
 		<div id="input">
-			<form method="get">
+			<form onsubmit="return false;">
 				<label id="lim">
 					lim 
 				</label>
 				<input id="function" type="text" name="function" required>
-				<input id="findLimit" type="submit" name="findLimit" value="="> 
+				<input id="findLimit" type="submit" name="findLimit" value="=" onclick="calculate()"> 
 				<br>
 				<label id="xGoes">
 					x→
@@ -23,6 +23,6 @@
 		</div><div id="output">
 			ATS
 		</div>
-
+		<script src="script.js"></script>
 	</body>
 </html>
