@@ -6,9 +6,10 @@
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
+		<div id="content" class="if">
 		<div id="input">
 			<form onsubmit="return false;">
-				<div id="limBlock" class="ib">
+				<div id="limBlock" class="if">
 					<label id="lim">
 						lim 
 					</label>
@@ -18,14 +19,14 @@
 						</label>
 						<input id="xTo" type="text" name="xGoesTo" required>
 					</div>
-				</div>
-				<div id="fuctionBlock" class="ib">
+				</div><div id="fuctionBlock" class="if">
 					<input id="function" type="text" name="function" required>
-					<input id="calcButton" type="submit" name="findLimit" value="=" onclick="calculate()"> 
+					<input id="calcButton" type="submit" name="findLimit" value="=" onsubmit="calculate()"> 
 				</div>
 			</form>
-		</div><div id="output">
-			ats
+			</div><div id="output">
+				ats
+			</div>
 		</div>
 		<div id="error"/>
 		<script src="script.js"></script>
