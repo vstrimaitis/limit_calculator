@@ -36,7 +36,7 @@ function calculate(){
                 }else if(response.limit == "+inf"){
                     output = "-∞";
                 }else{
-                    output = response.limit;
+                    output = round(response.limit);
                 }
             }else{
                 output = "Riba neegzistuoja";
@@ -70,4 +70,11 @@ function calculate(){
         }
     })
 
+}
+
+
+function round(numberString) {
+    const precision = 8;
+    let factor = Math.pow(10, precision);
+    return Math.round(parseFloat(numberString)*factor)/factor;
 }
