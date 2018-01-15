@@ -12,7 +12,7 @@ import Data.Aeson (ToJSON, FromJSON, genericToJSON, genericParseJSON, defaultOpt
 import Prelude hiding (error, function)
 
 import qualified LimitCalc.Parsing as P
-import qualified LimitCalc
+import LimitCalc
 import LimitCalc.Point
 
 main :: IO ()
@@ -39,20 +39,20 @@ instance FromJSON LimitRequest where
         { omitNothingFields = True }
 
 
-data Result
+data ResponseType
     = OK
     | FunctionParseError
     | PointParseError
     | UnknownLimit
-    | OutOfFuel
+    | RanOutOfFuel
     | UnsupportedOperation
     | FunctionUndefined
     deriving (Generic)
-instance ToJSON Result
-instance FromJSON Result
+instance ToJSON ResponseType
+instance FromJSON ResponseType
 
 data LimitResponse = LimitResp {
-    result :: Result,
+    result :: ResponseType,
     errorMessage :: Maybe String,
     errorLocation :: Maybe Integer,
     hasLimit :: Maybe Bool,
@@ -100,7 +100,7 @@ handleInprecise exprStr ptStr = do
 buildLimitResponse Undefined = emptyResponse {result = FunctionUndefined}
 buildLimitResponse Unknown = emptyResponse {result = UnknownLimit}
 buildLimitResponse NoLimit = emptyResponse {hasLimit = Just False}
-buildLimitResponse OutOfFuel = emptyResponse {result = Main.OutOfFuel}
+buildLimitResponse OutOfFuel = emptyResponse {result = RanOutOfFuel}
 buildLimitResponse (HasLimit PositiveInfinity) = emptyResponse {hasLimit = Just True, limit = Just "+inf"}
 buildLimitResponse (HasLimit NegativeInfinity) = emptyResponse {hasLimit = Just True, limit = Just "-inf"}
 buildLimitResponse (HasLimit (Finite lim)) = emptyResponse {hasLimit = Just True, limit = Just (show lim)}
