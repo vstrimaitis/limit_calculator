@@ -1,4 +1,4 @@
-projectName = SAP
+projectName = ribojame
 
 generuoti:
 	xelatex -jobname=$(projectName) main.tex

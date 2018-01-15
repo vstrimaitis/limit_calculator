@@ -124,9 +124,9 @@ Tokiu atveju, naudojame eurisitinę analizę.
 	\begin{itemize}
 		\item Sudėties operacija atliekame sudėdami atitinkamus eilučių koeficientus ir gauname tokios pačios formos eilutę.
 		\item Atimties operacija veikia atitinkamai sudėčiai, tai yra, koeficientai atimami.
-		\item Daugybos opercija atliekama taip - kiekvieną pirmos eilutės narį dauginame su antros eilutės nariu.
+		\item Daugybos operacija atliekama taip - kiekvieną pirmos eilutės narį dauginame su antros eilutės nariu.
 			  Gautą išraišką sutraukiame ir kiekvienam konkrečiam $n$ yra baigtinis skaičius narių turinčių $x^n$.
-			  Taip yra, nes $x^n$ išraišką gauname sudauginę $x^i$ ir $x^j$, kur $i <= \frac{n}{2}$ ir $j >= \frac{n}{2}$ ir atvirkščiai.
+			  Taip yra, nes $x^n$ išraišką gauname sudauginę $x^i$ ir $x^j$, kur $i \leq \frac{n}{2}$ ir $j \geq \frac{n}{2}$ ir atvirkščiai.
 			  Kiekvieną koeficientas yra konkretus skaičius, nes yra sutrauktas iš baigtinio kiekio narių.
 		\item Dalybos operacija atliekama pasiremiant polinomų dalybos stulpeliu algoritmą. 
 			  Šis algoritmas veikia taip pat kai turime ir baigtinius, ir begalinius dalinio ir daliklio argumentus.
@@ -150,7 +150,7 @@ Tokiu atveju, naudojame eurisitinę analizę.
 	
 	Tada turime: 
 	
-	$S - a_0 = P \times x$
+	$S - a_0 = P \cdotp x$
 	
 	Perrašome skleidinį:
 	
@@ -166,7 +166,9 @@ Tokiu atveju, naudojame eurisitinę analizę.
 	Tai yra, turime pateikti funkciją: 
 	
 	\[ g(a,n) = \frac{f^{(n)}(a)}{n!}\]
-	
+    
+    Operacijos $f(x)^{g(x)}$ bendru atveju išskleisti negalime. Šiai operacijai atlikti mes ją perrašome į $exp(g(x) \cdotp ln(f(x)))$,
+    o šių funkcijų skaičiavimas jau buvo pateiktas aukščiau.
 \subsection{Euristikos}
 	
 	%Toliau euristikos bus
