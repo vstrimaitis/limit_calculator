@@ -6,7 +6,10 @@ function calculate(){
     let func = funcField.value;
 
     const outputField = document.getElementById("output");
-    let output;
+    let output = "NOT YET CALCULATED.";
+
+    const errorField = document.getElementById("error");
+    let error = "";
 
     const url = "http://www.riboja.me/api/limits"; 
 
@@ -29,47 +32,46 @@ function calculate(){
         console.log(response);
         console.log(response.result == "FunctionParseError");
         console.log(response.errorMessage);
-        let answer = "NOT YET CALCULATED.";
         if(response.result == "OK"){
             if(response.hasLimit == true){
                 if(response.limit == "+inf"){
-                    answer = "+∞";
+                    output = "+∞";
                 }else if(response.limit == "+inf"){
-                    answer = "-∞";
+                    output = "-∞";
                 }else{
-                    answer = response.limit;
+                    output = response.limit;
                 }
             }else{
-                answer = "Riba neegzistuoja";
+                output = "Riba neegzistuoja";
             }
         }else if(response.result == "FunctionParseError"){
-            answer = response.errorMessage;
+            output = "Klaida: Neteisingai įvesta funkcija.";
+            error = response.errorMessage;
         }else if(response.result == "PointParseError"){
-            answer = response.errorMessage;
+            output = "Klaida: Neteisingai įvestas taškas.";
+            error = response.errorMessage;
         }else if(response.result == "UnknownLimit"){
-            answer = response.errorMessage;
+            output = "Klaida: Nepavyko išanazlizuoti ribos.";
         }else if(response.result == "RanOutOfFuel"){
-            answer = response.errorMessage;
+            output = "Klaida: Baigėsi kuras.";
         }else if(response.result == "UnsupportedOperation"){
-            answer = response.errorMessage;
+            output = "Klaida: Nepalaikoma operacija.";
+            error = response.errorMessage;
         }else if(response.result == "FunctionUndefined"){
-            answer = response.errorMessage;
+            output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
         }
         
-        if(answer == "NOT YET CALCULATED."){
-            let answer = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
+        if(output == "NOT YET CALCULATED."){
+            let output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
         }
 
 
-        outputField.innerHTML = answer;
+        outputField.innerHTML = output;
+        if(response.errorMessage != undefined){
+            errorField.innerHTML = "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + error;
+        }else{
+            errorField.innerHTML = "";
+        }
     })
-    /*.catch(function(error){ // print error if there is one 
-        //console.log(error);
-        answer = "TODO";
-
-
-        outputField.innerHTML = answer;
-        // make input func error letter color red
-    })*/
 
 }
