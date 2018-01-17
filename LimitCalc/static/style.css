@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+#content * {
+    box-sizing: default;
+}
+
 body {
     background-color: rgb(62, 122, 161);
     background-image: url(http://www.wolframcdn.com/homepage/blue-circles-WA2.png);
@@ -15,9 +19,9 @@ body {
 
 #centerBlock {
     position: absolute;
-    top: 35%;
+    top: 10%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, 0%);
     background-color: rgba(255, 255, 255, 0.75);
     padding: 5px;
     border: 0px;
@@ -126,19 +130,10 @@ form {
     background-color: rgb(206, 22, 8);
 }
 
-#output {
+#padding {
     margin-top: 1em;
+    text-align: center;
 }
-
-/* #output {
-    grid-column: 5;
-    grid-row: 1 / 2;
-    display: inline-block;
-    width: 20%;
-    font-size: 150%;
-    height: 100%;
-    padding-top: 3%;
-} */
 
 #error {
     position: absolute;
@@ -147,4 +142,38 @@ form {
     left: 50%;
     transform: translate(-50%, 0%);
     color: rgb(51, 4, 4);
+}
+
+/* Footer */
+
+#footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.75);
+}
+
+#footer p {
+    display: inline-block;
+}
+
+#footer p:first-child {
+    margin-left: 1em;
+    float: left;
+}
+
+#footer p:last-child {
+    float: right;
+    margin-right: 1em;
+}
+
+/* MathJax stuff */
+
+#output {
+    text-align: center;
+}
+
+.mjx-chtml.MJXc-display {
+    display: inline-block;
 }

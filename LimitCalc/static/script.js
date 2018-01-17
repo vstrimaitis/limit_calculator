@@ -21,8 +21,12 @@ function calculate() {
 
 function handleReponse(response) {
     switch (response.result) {
-        case "OK":{
-            output = "$$" + response.latex + " = " + getLimitValue(response) + "$$";
+        case "OK": {
+            if (response.hasLimit) {
+                output = "$$" + response.latex + " = " + getLimitValue(response) + "$$";
+            } else {
+                output = "Riba $$" + response.latex + "$$ neegzistuoja.";
+            }
             break;
         }
         case "FunctionParseError": {
@@ -60,8 +64,16 @@ function handleReponse(response) {
 }
 
 function setResult(output, response) {
+    const outputDiv = document.getElementById("output");
+    const paddingDiv = document.getElementById("padding");
+    paddingDiv.innerHTML = "Skaičiuojama..."
+    outputDiv.style.display = "none";
     document.getElementById("output").innerHTML = output;
     MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
+    setTimeout(function() {
+        outputDiv.style.display = "block";
+        paddingDiv.innerHTML = "";
+    }, 500);
     // document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
 
