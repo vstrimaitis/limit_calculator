@@ -1,77 +1,95 @@
-function calculate(){
-    const url = "http://www.riboja.me/api/limits"; 
+function calculate() {
+    const url = "/api/limits"; 
 
     let data = {
         function: document.getElementById("function").value,
         point: document.getElementById("xTo").value
-    }
+    };
 
     let params = {
         method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers({
-            "Content-Type": "applicication/json"
+            "Content-Type": "application/json"
         })
-    }
+    };
 
+    document.getElementById("padding").innerHTML = "Skaičiuojama...";
+    document.getElementById("output").style.display = "none";
     fetch(url, params)
-    .then(resp => resp.json())
-    .then(response =>handleReponse(response))
+        .then(resp => resp.json())
+        .then(response => handleReponse(response))
+        .catch(_ => document.getElementById("padding").innerHTML = "Įvyko klaida.");
 }
 
-function handleReponse(response){
-    switch(response.result) {
-        case "OK":{
-            output = getLimitValue(response);
+function handleReponse(response) {
+    switch (response.result) {
+        case "OK": {
+            if (response.hasLimit) {
+                output = "$$" + response.latex + " = " + getLimitValue(response) + "$$";
+            } else {
+                output = "Riba $$" + response.latex + "$$ neegzistuoja.";
+            }
             break;
         }
         case "FunctionParseError": {
-            output = "Klaida: Neteisingai įvesta funkcija.";
+            output = "Neteisingai įvesta funkcija.";
             break;
         }
         case "PointParseError": {
-            output = "Klaida: Neteisingai įvestas taškas.";
+            output = "Neteisingai įvestas taškas.";
             break;
         }
         case "UnknownLimit": {
-            output = "Klaida: Nepavyko išanazlizuoti ribos.";
+            // output = "Klaida: Nepavyko išanalizuoti ribos.";
+            output = "Nepavyko išanalizuoti $$" + response.latex + "$$";
             break;
         }
         case "RanOutOfFuel": {
-            output = "Klaida: Baigėsi kuras.";
+            // output = "Klaida: Baigėsi kuras.";
+            output = "Nepavyko išanalizuoti $$" + response.latex + "$$ (baigėsi kuras)";
             break;
         }
         case "UnsupportedOperation": {
             output = "Klaida: Nepalaikoma operacija.";
             break;
         }
-        case "FunctionUndefined":  {
+        case "FunctionUndefined": {
             output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
             break;
         }
         default: {
-            output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
+            output = "Nežinomas statusas: " + response.result;
             break;
         }
     }
     setResult(output, response);
 }
 
-function setResult(output, response){
+function setResult(output, response) {
+    const outputDiv = document.getElementById("output");
+    const paddingDiv = document.getElementById("padding");
+    paddingDiv.innerHTML = "Skaičiuojama...";
+    outputDiv.style.display = "none";
     document.getElementById("output").innerHTML = output;
-    document.getElementById("error").innerHTML =  response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
+    setTimeout(function() {
+        outputDiv.style.display = "block";
+        paddingDiv.innerHTML = "";
+    }, 500);
+    // document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
 
-function getLimitValue(response){
-    if (response.hasLimit == true) {
-        if(response.limit == "+inf"){
-            return  "+∞";
-        }else if(response.limit == "+inf"){
-            return "-∞";
-        }else{
+function getLimitValue(response) {
+    if (response.hasLimit === true) {
+        if (response.limit == "+inf") {
+            return "+\\infty";
+        } else if (response.limit == "+inf") {
+            return "-\\infty";
+        } else {
             return round(response.limit);
         }
-    } else{
+    } else {
         return "Riba neegzistuoja";
     }
 }
@@ -79,5 +97,5 @@ function getLimitValue(response){
 function round(numberString) {
     const precision = 8;
     let factor = Math.pow(10, precision);
-    return Math.round(parseFloat(numberString)*factor)/factor;
+    return Math.round(parseFloat(numberString) * factor) / factor;
 }

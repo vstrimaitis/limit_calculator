@@ -7,7 +7,7 @@ import Test.Hspec
 import LimitCalc
 import LimitCalc.Point
 import LimitCalc.Expr
-import LimitCalc.Parsing
+-- import LimitCalc.Parsing
 import LimitCalc.Sign
 import Control.Monad
 

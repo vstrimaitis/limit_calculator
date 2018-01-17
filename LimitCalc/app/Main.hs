@@ -10,11 +10,16 @@ import System.Environment
 import GHC.Generics
 import Data.Aeson (ToJSON, FromJSON, genericToJSON, genericParseJSON, defaultOptions, omitNothingFields, toJSON, parseJSON)
 import Prelude hiding (error, function)
+import Data.Ratio
 
 import qualified LimitCalc.Parsing as P
 import LimitCalc
 import LimitCalc.Point
-import LimitCalc.Expr (Expr)
+import LimitCalc.Expr (Expr, fromAst)
+import qualified LimitCalc.Ast as Ast
+import qualified LimitCalc.AstPoint as AstPt
+import qualified LatexExpr
+import qualified LatexPoint
 
 main :: IO ()
 main = do
@@ -57,7 +62,8 @@ data LimitResponse = LimitResp {
     errorMessage :: Maybe String,
     errorLocation :: Maybe Integer,
     hasLimit :: Maybe Bool,
-    limit :: Maybe String
+    limit :: Maybe String,
+    latex :: Maybe String
 } deriving (Generic)
 
 instance ToJSON LimitResponse where
@@ -67,7 +73,14 @@ instance FromJSON LimitResponse where
     parseJSON = genericParseJSON defaultOptions
         { omitNothingFields = True }
 
-emptyResponse = LimitResp {result = OK, errorMessage = Nothing, errorLocation = Nothing, hasLimit = Nothing, limit = Nothing}
+emptyResponse = LimitResp
+    { result = OK
+    , errorMessage = Nothing
+    , errorLocation = Nothing
+    , hasLimit = Nothing
+    , limit = Nothing
+    , latex = Nothing
+    }
 
 server :: ScottyM ()
 server = do
@@ -90,20 +103,26 @@ handlePrecise expr pt = do
         }
 
 handleInprecise exprStr ptStr = do
-    let exprParseResult :: Either P.ParseError (Expr Double) = P.parseExpr exprStr
-    let ptParseResult = P.parsePoint ptStr
+    let exprParseResult :: Either P.ParseError (Ast.Expr Rational) = P.parseExpr exprStr
+    let ptParseResult :: Either P.ParseError (Point (AstPt.Value Rational)) = P.parsePoint ptStr
     case (exprParseResult, ptParseResult) of
         (Left err, _) -> json emptyResponse {result = FunctionParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (_, Left err) -> json emptyResponse {result = PointParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (Right expr, Right pt) -> do
-            let lim = findLimit pt expr
-            json $ buildLimitResponse lim
+            let astWithDoubles = fmap fromRational expr :: Ast.Expr Double
+            let ptWithDoubles = fmap (fmap fromRational) pt :: Point (AstPt.Value Double)
+            let ptValue = fmap AstPt.foldToValue ptWithDoubles
+            let lim = findLimit ptValue (fromAst expr)
+            json $ buildLimitResponse lim $ makeLatex astWithDoubles ptWithDoubles
 
+makeLatex :: Ast.Expr Double -> Point (AstPt.Value Double) -> String
+makeLatex expr pt = "\\lim_{x \\to " ++ LatexPoint.makeLatex pt ++ "} " ++ LatexExpr.makeLatex expr
 
-buildLimitResponse Undefined = emptyResponse {result = FunctionUndefined}
-buildLimitResponse Unknown = emptyResponse {result = UnknownLimit}
-buildLimitResponse NoLimit = emptyResponse {hasLimit = Just False}
-buildLimitResponse OutOfFuel = emptyResponse {result = RanOutOfFuel}
-buildLimitResponse (HasLimit PositiveInfinity) = emptyResponse {hasLimit = Just True, limit = Just "+inf"}
-buildLimitResponse (HasLimit NegativeInfinity) = emptyResponse {hasLimit = Just True, limit = Just "-inf"}
-buildLimitResponse (HasLimit (Finite lim)) = emptyResponse {hasLimit = Just True, limit = Just (show lim)}
+buildLimitResponse :: Show a => Result a -> String -> LimitResponse
+buildLimitResponse Undefined latex = emptyResponse {result = FunctionUndefined, latex = Just latex}
+buildLimitResponse Unknown latex = emptyResponse {result = UnknownLimit, latex = Just latex}
+buildLimitResponse NoLimit latex = emptyResponse {hasLimit = Just False, latex = Just latex}
+buildLimitResponse OutOfFuel latex = emptyResponse {result = RanOutOfFuel, latex = Just latex}
+buildLimitResponse (HasLimit PositiveInfinity) latex = emptyResponse {hasLimit = Just True, limit = Just "+inf", latex = Just latex}
+buildLimitResponse (HasLimit NegativeInfinity) latex = emptyResponse {hasLimit = Just True, limit = Just "-inf", latex = Just latex}
+buildLimitResponse (HasLimit (Finite lim)) latex = emptyResponse {hasLimit = Just True, limit = Just (show lim), latex = Just latex}
