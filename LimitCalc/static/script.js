@@ -1,26 +1,26 @@
-function calculate(){
-    const url = "http://www.riboja.me/api/limits"; 
+function calculate() {
+    const url = "/api/limits"; 
 
     let data = {
         function: document.getElementById("function").value,
         point: document.getElementById("xTo").value
-    }
+    };
 
     let params = {
         method: 'POST',
         body: JSON.stringify(data),
         headers: new Headers({
-            "Content-Type": "applicication/json"
+            "Content-Type": "application/json"
         })
-    }
+    };
 
     fetch(url, params)
-    .then(resp => resp.json())
-    .then(response =>handleReponse(response))
+        .then(resp => resp.json())
+        .then(response => handleReponse(response));
 }
 
-function handleReponse(response){
-    switch(response.result) {
+function handleReponse(response) {
+    switch (response.result) {
         case "OK":{
             output = getLimitValue(response);
             break;
@@ -34,7 +34,7 @@ function handleReponse(response){
             break;
         }
         case "UnknownLimit": {
-            output = "Klaida: Nepavyko išanazlizuoti ribos.";
+            output = "Klaida: Nepavyko išanalizuoti ribos.";
             break;
         }
         case "RanOutOfFuel": {
@@ -45,33 +45,33 @@ function handleReponse(response){
             output = "Klaida: Nepalaikoma operacija.";
             break;
         }
-        case "FunctionUndefined":  {
+        case "FunctionUndefined": {
             output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
             break;
         }
         default: {
-            output = "TODO!!!!!!! SOMETHING WAS NOT CAUGHT!";
+            output = "Nežinomas statusas: " + response.result;
             break;
         }
     }
     setResult(output, response);
 }
 
-function setResult(output, response){
+function setResult(output, response) {
     document.getElementById("output").innerHTML = output;
-    document.getElementById("error").innerHTML =  response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
+    document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
 
-function getLimitValue(response){
-    if (response.hasLimit == true) {
-        if(response.limit == "+inf"){
-            return  "+∞";
-        }else if(response.limit == "+inf"){
+function getLimitValue(response) {
+    if (response.hasLimit === true) {
+        if (response.limit == "+inf") {
+            return "+∞";
+        } else if (response.limit == "+inf") {
             return "-∞";
-        }else{
+        } else {
             return round(response.limit);
         }
-    } else{
+    } else {
         return "Riba neegzistuoja";
     }
 }
@@ -79,5 +79,5 @@ function getLimitValue(response){
 function round(numberString) {
     const precision = 8;
     let factor = Math.pow(10, precision);
-    return Math.round(parseFloat(numberString)*factor)/factor;
+    return Math.round(parseFloat(numberString) * factor) / factor;
 }

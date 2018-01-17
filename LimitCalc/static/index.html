@@ -2,47 +2,33 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>Limitless limit calc (Limited edition)</title>
+		<title>riboja.me</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
 	</head>
 	<body>
 		<div id="centerBlock">
 			<div id="header">
-					<img src="http://www.userlogos.org/files/logos/Rog/wolframalpha.com_02.png" title="Totally Not Wolfram" alt="">
-					<span id="span1">
-						Riboja.me 
-					</span><span id="span2">
-						Beta
-					</span><span id="span3">
-						Ribų skaičiavimo <br>variklis
-					</span>
+				<div id="titleImage" class="title" title="Totally Not Wolfram"></div>
+				<!-- <img id="titleImage" class="title" src="http://www.userlogos.org/files/logos/Rog/wolframalpha.com_02.png" title="Totally Not Wolfram" alt=""> -->
+				<span id="titleRibojame" class="title">Riboja.me</span>
+				<span id="titleBeta" class="title">Beta</span>
+				<span id="titleExplanation" class="title">ribų skaičiavimo<br>variklis</span>
 			</div>
-			<div id="message">
-					Įveskite funciją ir tašką, kuriame norite suskaičiuoti ribą:
+			<div id="explanation">
+				Įveskite funciją ir tašką, kuriame norite suskaičiuoti ribą:
 			</div>
-			<div id="content" class="if">
-				<div id="input">
-					<form onsubmit="calculate(); return false;">
-						<div id="limBlock" class="if">
-							<label id="lim">
-								lim 
-							</label>
-							<div>
-								<label id="xToLabel">
-									x→
-								</label>
-								<input id="xTo" class="fields" type="text" name="xGoesTo" required>
-							</div>
-						</div><div id="fuctionBlock" class="if">
-							<input id="function" class="fields" type="text" name="function" required>
-							<input id="calcButton" class="fields" type="submit" name="findLimit" value="="> 
-						</div>
-					</form>
-				</div><div id="output">
-				</div>
+			<div id="content">
+				<form onsubmit="calculate(); return false;">
+					<label id="lim" for="function">lim</label>
+					<label id="xToLabel" for="xTo">x→</label>
+					<input id="function" class="fields" type="text" name="function" required>
+					<input id="xTo" class="fields" type="text" name="xGoesTo" required>
+					<input id="calcButton" class="fields" type="submit" name="findLimit" value="="> 
+				</form>
+				<div id="output"></div>
 			</div>
-		</div><div id="error">
 		</div>
+		<div id="error"></div>
 		<script src="script.js"></script>
 	</body>
 </html>
