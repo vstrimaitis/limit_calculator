@@ -5,13 +5,13 @@ module LimitCalc.Parsing
     ) where
 
 import Prelude hiding (subtract)
-import LimitCalc.Expr (Expr)
-import qualified LimitCalc.Expr as Expr
+import LimitCalc.Ast
 import LimitCalc.Point
+import qualified LimitCalc.AstPoint as Pt
 import Data.Foldable (msum)
 import Data.Ratio
 import Control.Arrow (left)
-import Control.Applicative
+import Control.Applicative ((<|>))
 import Text.Parsec (parse, try, sourceColumn)
 import qualified Text.Parsec as Parsec
 import Text.Parsec.Char
@@ -36,16 +36,16 @@ convertError parsecError = ParseError
         (errorMessages parsecError)
     }
 
-parseExpr :: Fractional a => String -> Either ParseError (Expr a)
-parseExpr = left convertError . parse (spaces >> expr) ""
+parseExpr :: String -> Either ParseError (Expr Rational)
+parseExpr = left convertError . parse (spaces >> expr <* eof) ""
 
 -- Expression parsing
 
 expr :: Fractional a => Parser (Expr a)
 expr = chainl1 prod (add <|> subtract) <* spaces
     where
-        add = makeOp '+' Expr.Add
-        subtract = makeOp '-' Expr.Subtract
+        add = makeOp '+' Add
+        subtract = makeOp '-' Subtract
 
 num :: Fractional a => Parser a
 num = do
@@ -62,13 +62,13 @@ x = name "x"
 
 fn :: Fractional a => Parser (Expr a -> Expr a)
 fn = msum $ (\(n, f) -> try (name n) >> return f) <$>
-    [ ("sin", Expr.Function Expr.Sin)
-    , ("cos", Expr.Function Expr.Cos)
-    , ("atan", Expr.Function Expr.Atan)
-    , ("arctg", Expr.Function Expr.Atan)
-    , ("exp", Expr.Function Expr.Exp)
-    , ("ln", Expr.Function Expr.Ln)
-    , ("sqrt", Expr.squareRoot)
+    [ ("sin", Function Sin)
+    , ("cos", Function Cos)
+    , ("atan", Function Atan)
+    , ("arctg", Function Atan)
+    , ("exp", Function Exp)
+    , ("ln", Function Ln)
+    , ("sqrt", Function Sqrt)
     ]
 
 name :: String -> Parser ()
@@ -77,10 +77,10 @@ name s = string s >> notFollowedBy alphaNum
 term :: Fractional a => Parser (Expr a)
 term = msum
     [ between (char '(' >> spaces) (spaces >> char ')') expr
-    , name "e" >> return (Expr.Function Expr.Exp (Expr.Const 1))
-    , name "pi" >> return Expr.Pi
-    , fmap Expr.Const num
-    , fmap (const Expr.X) x
+    , name "e" >> return E
+    , name "pi" >> return Pi
+    , fmap Const num
+    , fmap (const X) x
     ] <* spaces
 
 appl :: Fractional a => Parser (Expr a)
@@ -93,30 +93,30 @@ expo :: Fractional a => Parser (Expr a)
 expo = do
     base <- appl
     spaces
-    pwr <- (flip Expr.power <$> (char '^' >> spaces >> negated)) <|> return id
+    pwr <- (flip (BinaryOp Power) <$> (char '^' >> spaces >> negated)) <|> return id
     spaces
     return $ pwr base
 
 negated :: Fractional a => Parser (Expr a)
 negated = do
-    withSign <- (char '-' >> spaces >> return Expr.negate) <|> return id
+    withSign <- (char '-' >> spaces >> return Negate) <|> return id
     withSign <$> expo
 
 prod :: Fractional a => Parser (Expr a)
 prod = chainl1 negated (multiply <|> divide) <* spaces
     where
-        multiply = makeOp '*' Expr.Multiply
-        divide = makeOp '/' Expr.Divide
+        multiply = makeOp '*' Multiply
+        divide = makeOp '/' Divide
 
-makeOp :: Char -> Expr.Op -> Parser (Expr a -> Expr a -> Expr a)
-makeOp ch op = char ch >> spaces >> return (Expr.BinaryOp op)
+makeOp :: Char -> Op -> Parser (Expr a -> Expr a -> Expr a)
+makeOp ch op = char ch >> spaces >> return (BinaryOp op)
 
 -- Point parsing
 
-parsePoint :: Floating a => String -> Either ParseError (Point a)
-parsePoint = left convertError . parse point ""
+parsePoint :: Fractional a => String -> Either ParseError (Point (Pt.Value a))
+parsePoint = left convertError . parse (spaces >> point <* eof) ""
 
-point :: Floating a => Parser (Point a)
+point :: Fractional a => Parser (Point (Pt.Value a))
 point = spaces >> msum
     [ char '+' >> spaces >> name "inf" >> spaces >> return PositiveInfinity
     , name "inf" >> spaces >> return PositiveInfinity
@@ -124,38 +124,38 @@ point = spaces >> msum
     , Finite <$> value
     ]
 
-value :: Floating a => Parser a
+value :: Fractional a => Parser (Pt.Value a)
 value = spaces >> chainl1 pointProd (add <|> subtract) <* spaces
     where
-        add = makePointOp '+' (+)
-        subtract = makePointOp '-' (-)
+        add = makePointOp '+' Add
+        subtract = makePointOp '-' Subtract
 
-pointTerm :: Floating a => Parser a
+pointTerm :: Fractional a => Parser (Pt.Value a)
 pointTerm = msum
     [ between (char '(' >> spaces) (spaces >> char ')') value
-    , name "e" >> return (exp 1)
-    , name "pi" >> return pi
-    , num
+    , name "e" >> return Pt.E
+    , name "pi" >> return Pt.Pi
+    , Pt.Const <$> num
     ] <* spaces
 
-pointExpo :: Floating a => Parser a
+pointExpo :: Fractional a => Parser (Pt.Value a)
 pointExpo = do
     base <- pointTerm
     spaces
-    pwr <- (flip (**) <$> (char '^' >> spaces >> pointNegated)) <|> return id
+    pwr <- (flip (Pt.BinaryOp Power) <$> (char '^' >> spaces >> pointNegated)) <|> return id
     spaces
     return $ pwr base
 
-pointNegated :: Floating a => Parser a
+pointNegated :: Fractional a => Parser (Pt.Value a)
 pointNegated = do
-    withSign <- (char '-' >> spaces >> return negate) <|> return id
+    withSign <- (char '-' >> spaces >> return Pt.Negate) <|> return id
     withSign <$> pointExpo
 
-pointProd :: Floating a => Parser a
+pointProd :: Fractional a => Parser (Pt.Value a)
 pointProd = chainl1 pointNegated (multiply <|> divide) <* spaces
     where
-        multiply = makePointOp '*' (*)
-        divide = makePointOp '/' (/)
+        multiply = makePointOp '*' Multiply
+        divide = makePointOp '/' Divide
 
-makePointOp :: Floating a => Char -> (a -> a -> a) -> Parser (a -> a -> a)
-makePointOp ch op = char ch >> spaces >> return op
+makePointOp :: Fractional a => Char -> Op -> Parser (Pt.Value a -> Pt.Value a -> Pt.Value a)
+makePointOp ch op = char ch >> spaces >> return (Pt.BinaryOp op)

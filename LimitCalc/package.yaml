@@ -28,6 +28,8 @@ library:
   source-dirs: src
   exposed-modules:
   - LimitCalc
+  - LimitCalc.Ast
+  - LimitCalc.AstPoint
   - LimitCalc.Expr
   - LimitCalc.Parsing
   - LimitCalc.Point

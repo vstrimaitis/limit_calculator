@@ -4,10 +4,13 @@ module LimitCalc
     ( Result(Unknown, Undefined, OutOfFuel, NoLimit, HasLimit)
     , findLimit
     , findLimitWithFuel
+    , parseExpr
+    , parsePoint
     ) where
 
+import qualified LimitCalc.AstPoint as Pt
 import LimitCalc.Expr
-import LimitCalc.Parsing
+import qualified LimitCalc.Parsing
 import LimitCalc.Point
 import LimitCalc.Sign
 import qualified LimitCalc.Limits as Limits
@@ -22,6 +25,12 @@ data Result a
     | NoLimit
     | HasLimit (Point a)
     deriving Show
+
+parseExpr :: Fractional a => String -> Either LimitCalc.Parsing.ParseError (Expr a)
+parseExpr input = fromAst <$> LimitCalc.Parsing.parseExpr input
+
+parsePoint :: Floating a => String -> Either LimitCalc.Parsing.ParseError (Point a)
+parsePoint input = fmap Pt.foldToValue <$> LimitCalc.Parsing.parsePoint input
 
 defaultFuelAmount :: Integer
 defaultFuelAmount = 100
