@@ -109,11 +109,13 @@ handleInprecise exprStr ptStr = do
         (Left err, _) -> json emptyResponse {result = FunctionParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (_, Left err) -> json emptyResponse {result = PointParseError, errorMessage = Just (P.message err), errorLocation = Just (P.position err)}
         (Right expr, Right pt) -> do
-            let ptValue = fmap AstPt.foldToValue (fmap (fmap fromRational) pt :: Point (AstPt.Value Double))
+            let astWithDoubles = fmap fromRational expr :: Ast.Expr Double
+            let ptWithDoubles = fmap (fmap fromRational) pt :: Point (AstPt.Value Double)
+            let ptValue = fmap AstPt.foldToValue ptWithDoubles
             let lim = findLimit ptValue (fromAst expr)
-            json $ buildLimitResponse lim $ makeLatex expr pt
+            json $ buildLimitResponse lim $ makeLatex astWithDoubles ptWithDoubles
 
-makeLatex :: (Show a, Show b) => Ast.Expr a -> Point (AstPt.Value b) -> String
+makeLatex :: Ast.Expr Double -> Point (AstPt.Value Double) -> String
 makeLatex expr pt = "\\lim_{x \\to " ++ LatexPoint.makeLatex pt ++ "} " ++ LatexExpr.makeLatex expr
 
 buildLimitResponse :: Show a => Result a -> String -> LimitResponse

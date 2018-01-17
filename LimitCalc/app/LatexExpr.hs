@@ -1,12 +1,13 @@
 module LatexExpr (makeLatex) where
 
 import LimitCalc.Ast
+import LatexUtils
 
-makeLatex :: Show a => Expr a -> String
+makeLatex :: Expr Double -> String
 makeLatex expr = go 0 expr
 
-go :: Show a => Integer -> Expr a -> String
-go _ (Const a) = show a
+go :: Integer -> Expr Double -> String
+go _ (Const a) = showDouble a
 go _ X = "x"
 go _ Pi = "\\pi"
 go _ E = "e"
@@ -22,8 +23,3 @@ go _ (Function Atan a) = "arctg(" ++ go 0 a ++ ")"
 go _ (Function Exp a) = "exp(" ++ go 0 a ++ ")"
 go _ (Function Ln a) = "ln(" ++ go 0 a ++ ")"
 go _ (Function Sqrt a) = "\\sqrt{" ++ go 0 a ++ "}"
-
-parens :: Integer -> Integer -> String -> String
-parens a b val
-    | a < b = "(" ++ val ++ ")"
-    | otherwise = val

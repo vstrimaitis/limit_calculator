@@ -22,23 +22,25 @@ function calculate() {
 function handleReponse(response) {
     switch (response.result) {
         case "OK":{
-            output = getLimitValue(response);
+            output = "$$" + response.latex + " = " + getLimitValue(response) + "$$";
             break;
         }
         case "FunctionParseError": {
-            output = "Klaida: Neteisingai įvesta funkcija.";
+            output = "Neteisingai įvesta funkcija.";
             break;
         }
         case "PointParseError": {
-            output = "Klaida: Neteisingai įvestas taškas.";
+            output = "Neteisingai įvestas taškas.";
             break;
         }
         case "UnknownLimit": {
-            output = "Klaida: Nepavyko išanalizuoti ribos.";
+            // output = "Klaida: Nepavyko išanalizuoti ribos.";
+            output = "Nepavyko išanalizuoti $$" + response.latex + "$$";
             break;
         }
         case "RanOutOfFuel": {
-            output = "Klaida: Baigėsi kuras.";
+            // output = "Klaida: Baigėsi kuras.";
+            output = "Nepavyko išanalizuoti $$" + response.latex + "$$ (baigėsi kuras)";
             break;
         }
         case "UnsupportedOperation": {
@@ -59,15 +61,16 @@ function handleReponse(response) {
 
 function setResult(output, response) {
     document.getElementById("output").innerHTML = output;
-    document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
+    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
+    // document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
 
 function getLimitValue(response) {
     if (response.hasLimit === true) {
         if (response.limit == "+inf") {
-            return "+∞";
+            return "+\\infty";
         } else if (response.limit == "+inf") {
-            return "-∞";
+            return "-\\infty";
         } else {
             return round(response.limit);
         }

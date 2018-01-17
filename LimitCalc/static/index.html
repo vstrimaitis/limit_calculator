@@ -4,6 +4,9 @@
 		<meta charset="UTF-8">
 		<title>riboja.me</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
+		<script type="text/javascript"
+			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML">
+		</script>
 	</head>
 	<body>
 		<div id="centerBlock">
@@ -23,12 +26,12 @@
 					<label id="xToLabel" for="xTo">x→</label>
 					<input id="function" class="fields" type="text" name="function" required>
 					<input id="xTo" class="fields" type="text" name="xGoesTo" required>
-					<input id="calcButton" class="fields" type="submit" name="findLimit" value="="> 
+					<input id="calcButton" class="fields" type="submit" name="findLimit" value="go"> 
 				</form>
 				<div id="output"></div>
 			</div>
 		</div>
-		<div id="error"></div>
+		<!-- <div id="error"></div> -->
 		<script src="script.js"></script>
 	</body>
 </html>
