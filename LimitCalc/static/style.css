@@ -11,7 +11,7 @@ body {
     background-image: url(http://www.wolframcdn.com/homepage/blue-circles-WA2.png);
     background-size: cover;
     background-repeat: no-repeat;
-    background-attachment: fixed;    
+    background-attachment: fixed;
     background-position-x: 50%;
     background-position-y: 50%;
     font-family: Tahoma, Geneva, sans-serif;
@@ -176,4 +176,26 @@ form {
 
 .mjx-chtml.MJXc-display {
     display: inline-block;
+}
+
+/* For mobile */
+
+@media (max-aspect-ratio: 13 / 9) {
+    body {
+        font-size: 120%;
+        background-size: 180%;
+        background-position-x: 50%;
+        background-position-y: 0;
+    }
+
+    input {
+        font-size: 140% !important;
+    }
+
+    #centerBlock {
+        top: 5%;
+        left: 5%;
+        width: 90%;
+        transform: initial;
+    }
 }

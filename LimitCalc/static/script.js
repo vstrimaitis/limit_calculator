@@ -14,9 +14,12 @@ function calculate() {
         })
     };
 
+    document.getElementById("padding").innerHTML = "Skaičiuojama...";
+    document.getElementById("output").style.display = "none";
     fetch(url, params)
         .then(resp => resp.json())
-        .then(response => handleReponse(response));
+        .then(response => handleReponse(response))
+        .catch(_ => document.getElementById("padding").innerHTML = "Įvyko klaida.");
 }
 
 function handleReponse(response) {
@@ -66,7 +69,7 @@ function handleReponse(response) {
 function setResult(output, response) {
     const outputDiv = document.getElementById("output");
     const paddingDiv = document.getElementById("padding");
-    paddingDiv.innerHTML = "Skaičiuojama..."
+    paddingDiv.innerHTML = "Skaičiuojama...";
     outputDiv.style.display = "none";
     document.getElementById("output").innerHTML = output;
     MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
