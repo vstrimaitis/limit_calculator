@@ -172,7 +172,7 @@ flog :: (MaybeSigned a, Floating a) => Info a -> Calc (Info a)
 flog = liftC f
     where
         f :: (MaybeSigned a, Floating a) => Limit a -> Calc (Limit a)
-        f NoLimit = pure NoLimit
+        f NoLimit = pure Unknown
         f Unknown = pure Unknown
         f (HasLimit PositiveInfinity) = pure $ HasLimit PositiveInfinity
         f (HasLimit NegativeInfinity) = breakUndefined

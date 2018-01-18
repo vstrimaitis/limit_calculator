@@ -4,15 +4,18 @@
 		<meta charset="UTF-8">
 		<title>riboja.me</title>
 		<link rel="stylesheet" type="text/css" href="style.css">
-		<script type="text/javascript"
-			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML">
-		</script>
+		<script
+			src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML"></script>
+		<script
+			src="https://code.jquery.com/jquery-3.2.1.min.js"
+			integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+			crossorigin="anonymous"></script>
+		<script src="script.js"></script>
 	</head>
-	<body>
+	<body onload="init()">
 		<div id="centerBlock">
 			<div id="header">
 				<div id="titleImage" class="title" title="Totally Not Wolfram"></div>
-				<!-- <img id="titleImage" class="title" src="http://www.userlogos.org/files/logos/Rog/wolframalpha.com_02.png" title="Totally Not Wolfram" alt=""> -->
 				<span id="titleRibojame" class="title">Riboja.me</span>
 				<span id="titleBeta" class="title">Beta</span>
 				<span id="titleExplanation" class="title">ribų skaičiavimo<br>variklis</span>
@@ -24,9 +27,9 @@
 				<form onsubmit="calculate(); return false;">
 					<label id="lim" for="function">lim</label>
 					<label id="xToLabel" for="xTo">x→</label>
-					<input id="function" class="fields" type="text" name="function" required>
-					<input id="xTo" class="fields" type="text" name="xGoesTo" required>
-					<input id="calcButton" class="fields" type="submit" name="findLimit" value="go"> 
+					<input id="function" class="fields" type="text" name="function" required />
+					<input id="xTo" class="fields" type="text" name="xGoesTo" required />
+					<input id="calcButton" class="fields" type="submit" name="findLimit" value="go" disabled />
 				</form>
 				<!-- pretty ridiculous, right? -->
 				<div id="padding"></div>
@@ -40,7 +43,5 @@
 				<a href="https://github.com/vstrimaitis/limit_calculator" target="_blank">Kodas Github'e</a>
 			</p>
 		</div>
-		<!-- <div id="error"></div> -->
-		<script src="script.js"></script>
 	</body>
 </html>

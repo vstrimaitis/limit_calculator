@@ -1,3 +1,7 @@
+function init() {
+    $("#calcButton").prop("disabled", false);
+}
+
 function calculate() {
     const url = "/api/limits"; 
 
@@ -14,56 +18,75 @@ function calculate() {
         })
     };
 
-    document.getElementById("padding").innerHTML = "Skaičiuojama...";
-    document.getElementById("output").style.display = "none";
+    $("#padding").text("Skaičiuojama...");
+    $("#output").hide();
     fetch(url, params)
         .then(resp => resp.json())
         .then(response => handleReponse(response))
-        .catch(_ => document.getElementById("padding").innerHTML = "Įvyko klaida.");
+        // .catch(_ => showStatus([text("Nepavyko susisiekti su serveriu.")]));
 }
 
 function handleReponse(response) {
+    const limitLatex = "\\lim_{x \\to " + response.pointLatex + "} " + response.exprLatex;
     switch (response.result) {
         case "OK": {
             if (response.hasLimit) {
-                output = "$$" + response.latex + " = " + getLimitValue(response) + "$$";
+                showStatus([
+                    latex(limitLatex + " = " + response.limitLatex)
+                ]);
             } else {
-                output = "Riba $$" + response.latex + "$$ neegzistuoja.";
+                showStatus([
+                    text("Riba neegzistuoja:"),
+                    idented(latex(limitLatex))
+                ]);
             }
             break;
         }
         case "FunctionParseError": {
-            output = "Neteisingai įvesta funkcija.";
+            showStatus([
+                text("Neteisingai įvesta funkcija:"),
+                idented(text("TODO"))
+            ]);
             break;
         }
         case "PointParseError": {
-            output = "Neteisingai įvestas taškas.";
+            showStatus([
+                text("Neteisingai įvestas taškas:"),
+                idented(text("TODO"))
+            ]);
             break;
         }
         case "UnknownLimit": {
-            // output = "Klaida: Nepavyko išanalizuoti ribos.";
-            output = "Nepavyko išanalizuoti $$" + response.latex + "$$";
+            showStatus([
+                text("Nepavyko išanalizuoti ribos:"),
+                idented(latex(limitLatex))
+            ]);
             break;
         }
         case "RanOutOfFuel": {
-            // output = "Klaida: Baigėsi kuras.";
-            output = "Nepavyko išanalizuoti $$" + response.latex + "$$ (baigėsi kuras)";
-            break;
-        }
-        case "UnsupportedOperation": {
-            output = "Klaida: Nepalaikoma operacija.";
+            showStatus([
+                text("Nepavyko išanalizuoti ribos (baigėsi kuras):"),
+                idented(latex(limitLatex))
+            ]);
             break;
         }
         case "FunctionUndefined": {
-            output = "Klaida: Egzistuoja taško aplinka, kurioje funkcija neapibrėžta.";
+            showStatus([
+                text("Taškas"),
+                idented(latex(response.pointLatex)),
+                text("nėra funkcijos"),
+                idented(latex(response.exprLatex)),
+                text("ribinis taškas.")
+            ]);
             break;
         }
         default: {
-            output = "Nežinomas statusas: " + response.result;
+            showStatus([
+                text("Vidinė klaida: nežinomas statusas (" + response.result + ")")
+            ]);
             break;
         }
     }
-    setResult(output, response);
 }
 
 function setResult(output, response) {
@@ -80,22 +103,54 @@ function setResult(output, response) {
     // document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
 }
 
-function getLimitValue(response) {
-    if (response.hasLimit === true) {
-        if (response.limit == "+inf") {
-            return "+\\infty";
-        } else if (response.limit == "-inf") {
-            return "-\\infty";
-        } else {
-            return round(response.limit);
-        }
-    } else {
-        return "Riba neegzistuoja";
-    }
-}
-
 function round(numberString) {
     const precision = 8;
     let factor = Math.pow(10, precision);
     return Math.round(parseFloat(numberString) * factor) / factor;
+}
+
+function text(str) {
+    return {
+        elem: $("<p>").text(str),
+        hasLatex: false,
+    };
+}
+
+function idented(thing) {
+    thing.elem.addClass("identedBlock");
+    return thing;
+}
+
+function latex(str) {
+    return {
+        elem: $("<p>").text("$$" + str + "$$"),
+        hasLatex: true,
+    };
+}
+
+function showStatus(items) {
+    console.log('showing status');
+    console.log(items);
+    const outputDiv = $("#output");
+    const paddingDiv = $("#padding");
+    outputDiv.empty();
+    var hasLatex = false;
+    for (var i = 0; i < items.length; i++) {
+        outputDiv.append(items[i].elem);
+        if (items[i].hasLatex) {
+            var id = 'contentElem' + i;
+            items[i].elem.attr('id', id);
+            MathJax.Hub.Queue(["Typeset",MathJax.Hub,id]);
+            hasLatex = true;
+        }
+    }
+    if (hasLatex) {
+        setTimeout(function() {
+            outputDiv.show();
+            paddingDiv.text('');
+        }, 500);
+    } else {
+        paddingDiv.text('');
+        outputDiv.show();
+    }
 }

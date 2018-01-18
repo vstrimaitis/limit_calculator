@@ -56,14 +56,16 @@ data ResponseType
 instance ToJSON ResponseType
 instance FromJSON ResponseType
 
-data LimitResponse = LimitResp {
-    result :: ResponseType,
-    errorMessage :: Maybe String,
-    errorLocation :: Maybe Integer,
-    hasLimit :: Maybe Bool,
-    limit :: Maybe String,
-    latex :: Maybe String
-} deriving (Generic)
+data LimitResponse = LimitResp
+    { result :: ResponseType
+    , errorMessage :: Maybe String
+    , errorLocation :: Maybe Integer
+    , hasLimit :: Maybe Bool
+    , limit :: Maybe String
+    , exprLatex :: Maybe String
+    , pointLatex :: Maybe String
+    , limitLatex :: Maybe String
+    } deriving (Generic)
 
 instance ToJSON LimitResponse where
     toJSON = genericToJSON defaultOptions
@@ -78,7 +80,9 @@ emptyResponse = LimitResp
     , errorLocation = Nothing
     , hasLimit = Nothing
     , limit = Nothing
-    , latex = Nothing
+    , exprLatex = Nothing
+    , pointLatex = Nothing
+    , limitLatex = Nothing
     }
 
 server :: ScottyM ()
@@ -112,16 +116,54 @@ handleInprecise exprStr ptStr = do
             let ptWithDoubles = fmap (fmap fromRational) pt :: Point (AstPt.Value Double)
             let ptValue = fmap AstPt.foldToValue ptWithDoubles
             let lim = findLimit ptValue (fromAst expr)
-            json $ buildLimitResponse lim $ makeLatex astWithDoubles ptWithDoubles
+            json $ buildLimitResponse astWithDoubles ptWithDoubles lim
 
 makeLatex :: (ShowLatex a, ShowLatex b) => Ast.Expr a -> Point b -> String
 makeLatex expr pt = "\\lim_{x \\to " ++ showLatex pt ++ "} " ++ showLatex expr
 
-buildLimitResponse :: Show a => Result a -> String -> LimitResponse
-buildLimitResponse Undefined latex = emptyResponse {result = FunctionUndefined, latex = Just latex}
-buildLimitResponse Unknown latex = emptyResponse {result = UnknownLimit, latex = Just latex}
-buildLimitResponse NoLimit latex = emptyResponse {hasLimit = Just False, latex = Just latex}
-buildLimitResponse OutOfFuel latex = emptyResponse {result = RanOutOfFuel, latex = Just latex}
-buildLimitResponse (HasLimit PositiveInfinity) latex = emptyResponse {hasLimit = Just True, limit = Just "+inf", latex = Just latex}
-buildLimitResponse (HasLimit NegativeInfinity) latex = emptyResponse {hasLimit = Just True, limit = Just "-inf", latex = Just latex}
-buildLimitResponse (HasLimit (Finite lim)) latex = emptyResponse {hasLimit = Just True, limit = Just (show lim), latex = Just latex}
+buildLimitResponse :: (ShowLatex a, ShowLatex b, ShowLatex c, Show c)
+    => Ast.Expr a
+    -> Point b
+    -> Result c
+    -> LimitResponse
+buildLimitResponse expr pt Undefined = emptyResponse
+    { result = FunctionUndefined
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    }
+buildLimitResponse expr pt Unknown = emptyResponse
+    { result = UnknownLimit
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    }
+buildLimitResponse expr pt NoLimit = emptyResponse
+    { hasLimit = Just False
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    }
+buildLimitResponse expr pt OutOfFuel = emptyResponse
+    { result = RanOutOfFuel
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    }
+buildLimitResponse expr pt (HasLimit lim@PositiveInfinity) = emptyResponse
+    { hasLimit = Just True
+    , limit = Just "+inf"
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    , limitLatex = Just $ showLatex lim
+    }
+buildLimitResponse expr pt (HasLimit lim@NegativeInfinity) = emptyResponse
+    { hasLimit = Just True
+    , limit = Just "-inf"
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    , limitLatex = Just $ showLatex lim
+    }
+buildLimitResponse expr pt (HasLimit lim@(Finite value)) = emptyResponse
+    { hasLimit = Just True
+    , limit = Just $ show value
+    , exprLatex = Just $ showLatex expr
+    , pointLatex = Just $ showLatex pt
+    , limitLatex = Just $ showLatex lim
+    }
