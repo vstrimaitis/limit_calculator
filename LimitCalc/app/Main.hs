@@ -18,8 +18,7 @@ import LimitCalc.Point
 import LimitCalc.Expr (Expr, fromAst)
 import qualified LimitCalc.Ast as Ast
 import qualified LimitCalc.AstPoint as AstPt
-import qualified LatexExpr
-import qualified LatexPoint
+import ShowLatex
 
 main :: IO ()
 main = do
@@ -115,8 +114,8 @@ handleInprecise exprStr ptStr = do
             let lim = findLimit ptValue (fromAst expr)
             json $ buildLimitResponse lim $ makeLatex astWithDoubles ptWithDoubles
 
-makeLatex :: Ast.Expr Double -> Point (AstPt.Value Double) -> String
-makeLatex expr pt = "\\lim_{x \\to " ++ LatexPoint.makeLatex pt ++ "} " ++ LatexExpr.makeLatex expr
+makeLatex :: (ShowLatex a, ShowLatex b) => Ast.Expr a -> Point b -> String
+makeLatex expr pt = "\\lim_{x \\to " ++ showLatex pt ++ "} " ++ showLatex expr
 
 buildLimitResponse :: Show a => Result a -> String -> LimitResponse
 buildLimitResponse Undefined latex = emptyResponse {result = FunctionUndefined, latex = Just latex}
