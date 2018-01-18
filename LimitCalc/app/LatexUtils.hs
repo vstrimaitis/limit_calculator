@@ -14,3 +14,4 @@ showDouble x = fixString (show x)
 
         endsWithZero ".0" = True
         endsWithZero (_:xs) = endsWithZero xs
+        endsWithZero _ = False
