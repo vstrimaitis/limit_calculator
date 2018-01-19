@@ -2,6 +2,7 @@ module LimitsBasicSpec (spec) where
 
 import Test.Hspec
 import LimitCalc
+import LimitCalc.Exact (Exact)
 import LimitCalc.Point
 import LimitCalc.Sign
 import TestsCommon
@@ -43,4 +44,6 @@ tests =
     ]
 
 spec :: Spec
-spec = createTests (tests :: [Test Double])
+spec = do
+    describe "With doubles" $ createTests (tests :: [Test Double])
+    describe "With Exact" $ createTests (tests :: [Test Exact])

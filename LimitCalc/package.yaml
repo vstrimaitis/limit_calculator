@@ -30,6 +30,7 @@ library:
   - LimitCalc
   - LimitCalc.Ast
   - LimitCalc.AstPoint
+  - LimitCalc.Exact
   - LimitCalc.Expr
   - LimitCalc.Parsing
   - LimitCalc.Point
