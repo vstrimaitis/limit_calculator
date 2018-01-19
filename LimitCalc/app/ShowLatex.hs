@@ -16,6 +16,7 @@ class ShowLatex a where
     showLatex :: a -> String
 
 instance ShowLatex Double where
+    showLatex 0 = "0"
     showLatex x = fixString (show x)
         where
             fixString s

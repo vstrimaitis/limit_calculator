@@ -5,9 +5,12 @@ function init() {
 function calculate() {
     const url = "/api/limits"; 
 
+    let functionQuery = document.getElementById("function").value;
+    let pointQuery = document.getElementById("xTo").value;
+
     let data = {
-        function: document.getElementById("function").value,
-        point: document.getElementById("xTo").value
+        function: functionQuery,
+        point: pointQuery
     };
 
     let params = {
@@ -22,11 +25,17 @@ function calculate() {
     $("#output").hide();
     fetch(url, params)
         .then(resp => resp.json())
-        .then(response => handleReponse(response))
-        // .catch(_ => showStatus([text("Nepavyko susisiekti su serveriu.")]));
+        .catch(_ => {
+            showStatus([text("Nepavyko susisiekti su serveriu.")]);
+            return null;
+        })
+        .then(response => handleReponse(response, functionQuery, pointQuery));
 }
 
-function handleReponse(response) {
+function handleReponse(response, exprText, pointText) {
+    if (response === null) {
+        return;
+    }
     const limitLatex = "\\lim_{x \\to " + response.pointLatex + "} " + response.exprLatex;
     switch (response.result) {
         case "OK": {
@@ -45,14 +54,16 @@ function handleReponse(response) {
         case "FunctionParseError": {
             showStatus([
                 text("Neteisingai įvesta funkcija:"),
-                idented(text("TODO"))
+                idented(markedCode(exprText, response.errorLocation))
+                // text(response.errorMessage)
             ]);
             break;
         }
         case "PointParseError": {
             showStatus([
                 text("Neteisingai įvestas taškas:"),
-                idented(text("TODO"))
+                idented(markedCode(pointText, response.errorLocation))
+                // text(response.errorMessage)
             ]);
             break;
         }
@@ -112,7 +123,26 @@ function round(numberString) {
 function text(str) {
     return {
         elem: $("<p>").text(str),
-        hasLatex: false,
+        hasLatex: false
+    };
+}
+
+function markedCode(str, pos) {
+    pos -= 1;
+    let before = $("<span>").text(str.substring(0, pos));
+    let markedText = str.substring(pos, pos + 1).trim();
+    if (markedText.length == 0) {
+        markedText = "\xa0";
+    }
+    let marked = $("<span>").addClass("marked").text(markedText);
+    let after = $("<span>").text(str.substring(pos + 1));
+    return {
+        elem: $("<p>")
+            .addClass("codeBlock")
+            .append(before)
+            .append(marked)
+            .append(after),
+        hasLatex: false
     };
 }
 
