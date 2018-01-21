@@ -41,7 +41,7 @@ function handleReponse(response, exprText, pointText) {
         case "OK": {
             if (response.hasLimit) {
                 showStatus([
-                    latex(limitLatex + " = " + response.limitLatex)
+                    latex(limitLatex + " = " + limitToLatex(response.limit))
                 ]);
             } else {
                 showStatus([
@@ -83,11 +83,7 @@ function handleReponse(response, exprText, pointText) {
         }
         case "FunctionUndefined": {
             showStatus([
-                text("Taškas"),
-                idented(latex(response.pointLatex)),
-                text("nėra funkcijos"),
-                idented(latex(response.exprLatex)),
-                text("ribinis taškas.")
+                text("Taškas $$" + response.pointLatex + "$$ nėra funkcijos $$" + response.exprLatex + "$$ ribinis taškas.", true)
             ]);
             break;
         }
@@ -100,18 +96,14 @@ function handleReponse(response, exprText, pointText) {
     }
 }
 
-function setResult(output, response) {
-    const outputDiv = document.getElementById("output");
-    const paddingDiv = document.getElementById("padding");
-    paddingDiv.innerHTML = "Skaičiuojama...";
-    outputDiv.style.display = "none";
-    document.getElementById("output").innerHTML = output;
-    MathJax.Hub.Queue(["Typeset",MathJax.Hub,"output"]);
-    setTimeout(function() {
-        outputDiv.style.display = "block";
-        paddingDiv.innerHTML = "";
-    }, 500);
-    // document.getElementById("error").innerHTML = response.errorMessage ? "Iš sistemos gautas išsamesnis klaidos pranešimas: <br> <br>" + response.errorMessage : "";
+function limitToLatex(limit) {
+    if (limit === "+inf") {
+        return "+\\infty";
+    } else if (limit === "-inf") {
+        return "-\\infty";
+    } else {
+        return round(limit);
+    }
 }
 
 function round(numberString) {
@@ -120,10 +112,14 @@ function round(numberString) {
     return Math.round(parseFloat(numberString) * factor) / factor;
 }
 
-function text(str) {
+function text(str, withLatex) {
+    var elem = $("<p>").text(str);
+    if (withLatex) {
+        elem.addClass('inlineLatex');
+    }
     return {
-        elem: $("<p>").text(str),
-        hasLatex: false
+        elem: elem,
+        hasLatex: withLatex || false
     };
 }
 
@@ -159,8 +155,6 @@ function latex(str) {
 }
 
 function showStatus(items) {
-    console.log('showing status');
-    console.log(items);
     const outputDiv = $("#output");
     const paddingDiv = $("#padding");
     outputDiv.empty();

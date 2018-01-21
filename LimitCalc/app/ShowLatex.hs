@@ -2,7 +2,8 @@ module ShowLatex
     ( ShowLatex
     , showLatex
     ) where
-    
+
+import Numeric
 import LimitCalc.Ast
 import LimitCalc.Point
 import qualified LimitCalc.AstPoint as P
@@ -17,7 +18,7 @@ class ShowLatex a where
 
 instance ShowLatex Double where
     showLatex 0 = "0"
-    showLatex x = fixString (show x)
+    showLatex x = fixString (showFFloat Nothing x "")
         where
             fixString s
                 | endsWithZero s = take (length s - 2) s

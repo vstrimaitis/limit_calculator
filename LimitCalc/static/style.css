@@ -8,7 +8,7 @@
 
 body {
     background-color: rgb(62, 122, 161);
-    /* background-image: url(http://www.wolframcdn.com/homepage/blue-circles-WA2.png); */
+    background-image: url(http://www.wolframcdn.com/homepage/blue-circles-WA2.png);
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -145,16 +145,21 @@ form {
 
 .codeBlock {
     font-family: Courier New, Courier, monospace;
-    font-size: 110%;
+    font-size: 120%;
     color: rgb(30, 30, 30);
 }
 
 .marked {
-    background-color: rgb(255, 115, 0);
+    background-color: rgb(255, 100, 100);
 }
 
 #output > p > span {
     text-align: left !important;
+}
+
+p.inlineLatex > span {
+    display: inline-block;
+    margin: 0;
 }
 
 #output {
