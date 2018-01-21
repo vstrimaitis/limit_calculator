@@ -84,7 +84,7 @@ function getLimitValue(response) {
     if (response.hasLimit === true) {
         if (response.limit == "+inf") {
             return "+\\infty";
-        } else if (response.limit == "+inf") {
+        } else if (response.limit == "-inf") {
             return "-\\infty";
         } else {
             return round(response.limit);
