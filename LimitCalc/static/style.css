@@ -130,18 +130,42 @@ form {
     background-color: rgb(206, 22, 8);
 }
 
+#calcButton:disabled {
+    background-color: gray;
+}
+
 #padding {
-    margin-top: 1em;
+    margin-top: 2em;
     text-align: center;
 }
 
-#error {
-    position: absolute;
-    bottom: 1%;
-    text-align: center;
-    left: 50%;
-    transform: translate(-50%, 0%);
-    color: rgb(51, 4, 4);
+.identedBlock {
+    margin-left: 2em;
+}
+
+.codeBlock {
+    font-family: Courier New, Courier, monospace;
+    font-size: 120%;
+    color: rgb(30, 30, 30);
+}
+
+.marked {
+    background-color: rgb(255, 100, 100);
+}
+
+#output > p > span {
+    text-align: left !important;
+}
+
+p.inlineLatex > span {
+    display: inline-block;
+    margin: 0;
+}
+
+#output {
+    border-top: 1px solid rgb(65, 65, 65);
+    display: none;
+    padding-top: 1em;
 }
 
 /* Footer */
@@ -166,16 +190,6 @@ form {
 #footer p:last-child {
     float: right;
     margin-right: 1em;
-}
-
-/* MathJax stuff */
-
-#output {
-    text-align: center;
-}
-
-.mjx-chtml.MJXc-display {
-    display: inline-block;
 }
 
 /* For mobile */
