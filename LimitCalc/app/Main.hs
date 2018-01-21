@@ -90,6 +90,7 @@ server = do
     get "/" $ file "./static/index.html"
     get "/script.js" $ file "./static/script.js"
     get "/style.css" $ file "./static/style.css"
+    get "/ribojame.pdf" $ file "./static/ribojame.pdf"
     post "/api/limits" $ do
         (req :: LimitRequest) <- jsonData
         let expr = function req
