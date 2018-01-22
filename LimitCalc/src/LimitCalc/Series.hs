@@ -228,7 +228,7 @@ convergenceDirection series = go (safeTail $ sPos series) $ cycle [FromBoth, Fro
     where
         go :: MaybeSigned a => [a] -> [ConvergenceDir] -> Calc ConvergenceDir
         go _ [] = error "list should have been infinite"
-        go [] _ = breakUnknown
+        go [] _ = breakUndefined
         go (x:xs) (y:ys) = consumeFuel >> (case getSign x of
             Just Positive -> pure y
             Just Negative -> pure $ flipSign y
