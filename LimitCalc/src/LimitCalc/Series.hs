@@ -220,6 +220,25 @@ divergence s = go (sNeg s) $ cycle [Both, PositiveInf]
         flipSign NegativeInf = PositiveInf
         flipSign Both = Both
 
+
+data ConvergenceDir = FromPositive | FromNegative | FromBoth deriving Show
+
+convergenceDirection :: MaybeSigned a => Series a -> Calc ConvergenceDir
+convergenceDirection series = go (safeTail $ sPos series) $ cycle [FromBoth, FromPositive]
+    where
+        go :: MaybeSigned a => [a] -> [ConvergenceDir] -> Calc ConvergenceDir
+        go _ [] = error "list should have been infinite"
+        go [] _ = breakUnknown
+        go (x:xs) (y:ys) = consumeFuel >> (case getSign x of
+            Just Positive -> pure y
+            Just Negative -> pure $ flipSign y
+            Just Zero -> go xs ys
+            Nothing -> breakUnknown)
+
+        flipSign FromPositive = FromNegative
+        flipSign FromNegative = FromPositive
+        flipSign FromBoth = FromBoth
+
 power :: (MaybeSigned a, Floating a) => a -> Series a -> Calc (Result a)
 power nn = makeFunction deriv heur
     where
@@ -269,7 +288,12 @@ flog series = divergence series >>= \d -> case d of
     Nothing -> case getSign (safeHead (sPos series)) of
         Just Positive -> makeFunction der heur series
         Just Negative -> breakUndefined
-        Just Zero -> breakUnknown
+        Just Zero -> do
+            convDir <- convergenceDirection series
+            case convDir of
+                FromPositive -> pure $ Left $ H.Info (HasLimit NegativeInfinity)
+                FromNegative -> breakUndefined
+                FromBoth -> pure $ Left $ H.Info (HasLimit NegativeInfinity)
         Nothing -> breakUnknown
     where
         der n a =
