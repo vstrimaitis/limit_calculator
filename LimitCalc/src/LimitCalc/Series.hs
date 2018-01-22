@@ -305,7 +305,7 @@ flog series = divergence series >>= \d -> case d of
         heur d = case d of
             PositiveInf -> pure $ H.Info (HasLimit PositiveInfinity)
             NegativeInf -> breakUndefined
-            Both -> breakUndefined
+            Both -> pure $ H.Info (HasLimit PositiveInfinity)
 
 fatan :: (MaybeSigned a, Floating a) => Series a -> Calc (Result a)
 fatan = makeFunction (\n a -> coefs a !!! n) heur
