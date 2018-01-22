@@ -169,6 +169,28 @@ Tokiu atveju, naudojame eurisitinę analizę.
     
     Operacijos $f(x)^{g(x)}$ bendru atveju išskleisti negalime. Šiai operacijai atlikti mes ją perrašome į $exp(g(x) \cdotp ln(f(x)))$,
     o šių funkcijų skaičiavimas jau buvo pateiktas aukščiau.
+
+\subsection{Paklaidos skaičiavimas}
+	Laipsnių eilutės ribą paprasčiausia skaičiuoti kai $x$ artėja į 0:
+	\begin{itemize}
+		\item Jei laipsnių eilutėje nėra narių su neigiamu $x$ laipsniu, eilutės riba bus lygi laisvajam nariui
+			(koeficientui prie $x^0$).
+		\item Jei mažiausias iš neigiamų $x$ laipsnių yra nelyginis, ribos nėra -- kai $x$ artės į 0 iš priešingų pusių,
+			eilutės reikšmė artės į skirtingų ženklų begalybes.
+		\item Jei mažiausias iš neigiamų $x$ laipsnių yra lyginis, ribas bus begalinė, o jos ženklas bus lygus to nario
+			koeficiento ženklui.
+	\end{itemize}
+
+	
+	Todėl ribą visada skaičiuojame kai $x$ artėja į 0. Jei duotas kitoks taškas, galime vietoj $x$ įsistatyti keitinį:
+	\begin{itemize}
+		\item Jei duotas baigtinis taškas $a$, vietoj $x$ įsistatome $a + x$.
+		\item Jei duotas taškas yra $+\infty$, vietoj $x$ įsistatome $\frac{1}{x^2}$.
+		\item Jei duotas taškas yra $-\infty$, vietoj $x$ įsistatome $-\frac{1}{x^2}$.
+	\end{itemize}
+
+
+
 \subsection{Euristikos}
     Naudojamos dviejų tipų euristikos:
     \begin{enumerate}

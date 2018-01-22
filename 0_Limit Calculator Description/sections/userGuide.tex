@@ -2,17 +2,28 @@
 
 	Programos naudojimui sukūrėme internetinį puslapį, kurį vartotojai gali pasiekti 
 	naudojantis savo įrenginiu, turinčiu prieigą prie interneto.
-	Vartotojo sąsają sudaro keturi pagrindiniai komponentai: funkcijos ir taško įvedimo laukai, ,,='' mygtukas ir rezultato laukas.
+	Vartotojo sąsają sudaro keturi pagrindiniai komponentai: funkcijos ir taško įvedimo laukai, ,,go'' mygtukas ir rezultato laukas.
 	
 	\begin{itemize}
-		\item funkcijos įvedimo laukas - tai tekstinis laukas, kuriame įvedama vartotojo pasirinkta funckija.
-		\item taško įvedimo laukas - tai tekstinis laukas, kuriame įvedamas vartotojo pasirinktas skaičius į kurį artėja kintamojo reikšmė.
-		\item ribos skaičiavimo mygtukas ,,='' - tai mygtukas, kurį paspaudus siunčiamas kreipimasis į serverį ir laukiamas skaičiavimo rezultatas.
-		\item rezultato laukas - tekstinis laukas, kuriame vaizduojamas gautasis skaičiavimo rezultatas. 
+		\item Funkcijos įvedimo laukas -- tai tekstinis laukas, kuriame įvedama vartotojo pasirinkta funckija. Leidžiamos
+			naudoti konstantos, funkcijos, ir operatoriai pateikti lentelėje \ref{tab:funcInput}.
+		\item Taško įvedimo laukas -- tai tekstinis laukas, kuriame įvedamas vartotojo pasirinktas skaičius į kurį artėja
+			kintamojo reikšmė. Galima pateikti baigtinį tašką (leidžiamos naudoti konstantos ir operatoriai pateikti
+			lentelėje \ref{tab:pointInput}), arba begalinį -- ,,+inf'' ($+\infty$), ,,-inf'' ($-\infty$), arba ,,inf''
+			(tas pats kaip ir ,,+inf'' -- $+\infty$).
+		\item Ribos skaičiavimo mygtukas ,,go'' -- tai mygtukas, kurį paspaudus siunčiamas kreipimasis į serverį ir laukiama skaičiavimo rezultato.
+		\item Rezultato laukas -- jame vaizduojamas gautas skaičiavimo rezultatas. 
 		Jį sudaro gauta ribos reikšmė arba klaidos pranešimas, nusakantis kodėl nepavyko jos apskaičiuoti.
 	\end{itemize}
 	
-	
+	Ribų skaičiavimo sistema pateikia vieną iš keturių atsakymų, kurį parodo internetinis puslapis:
+
+	\begin{itemize}
+		\item Jei riba egzistuoja ir programa ją rado, grąžinama rasta riba.
+		\item Jei riba neegzistuoja ir programa, pranešama, kad riba neegzistuoja.
+		\item Jei įvesta funkcija arba taškas yra sintaksiškai neteisingi, apie tai pranešama ir parodoma klaidos vieta.
+		\item Jei programa negalėjo nustatyti ribos arba ar riba išvis egzistuoja, pranešama, kad nepavyko išanalizuoti ribos.
+	\end{itemize}
 	
 	\begin{table} [H]
 		\renewcommand{\tabularxcolumn}[1]{m{#1}}
